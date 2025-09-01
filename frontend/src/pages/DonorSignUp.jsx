@@ -1,6 +1,6 @@
 // src/pages/DonorSignUp.jsx
 import { useState } from "react";
-import { Mail, Lock, User, Phone, MapPin, Check, Heart } from "lucide-react";
+import { Mail, Lock, User, Phone, MapPin, Check, Heart, Home } from "lucide-react";
 import Footer from "../components/Footer";
 
 export default function DonorSignUp() {
@@ -118,20 +118,37 @@ export default function DonorSignUp() {
             </div>
           </div>
 
-          {/* Location */}
+          {/* Address */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Location
+              Address
+            </label>
+            <div className="flex items-center border rounded-lg px-3 bg-gray-50 focus-within:ring-2 focus-within:ring-teal-400">
+              <Home className="h-5 w-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Enter your street address"
+                className="w-full p-2 bg-transparent outline-none"
+              />
+            </div>
+          </div>
+
+          {/* Postal Code */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Postal Code
             </label>
             <div className="flex items-center border rounded-lg px-3 bg-gray-50 focus-within:ring-2 focus-within:ring-teal-400">
               <MapPin className="h-5 w-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Enter your location"
+                placeholder="Enter your postal code"
                 className="w-full p-2 bg-transparent outline-none"
               />
             </div>
           </div>
+
+          
 
           {/* Terms Agreement */}
           <div className="flex items-center mb-6 text-sm">
