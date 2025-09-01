@@ -1,0 +1,95 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body, #root { height: 100%; }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center rounded-md px-4 py-2 font-medium transition;
+  }
+
+  /* Primary (Rose) */
+  .btn-primary {
+    @apply bg-rose-500 text-white hover:bg-rose-600;
+  }
+
+  /* Accent (Yellow) */
+  .btn-accent {
+    @apply bg-yellow-400 text-white hover:bg-yellow-500;
+  }
+
+  /* White buttons with colored text */
+  .btn-white-rose {
+    @apply bg-white text-rose-500 hover:bg-rose-50;
+  }
+  .btn-white-yellow {
+    @apply bg-white text-yellow-500 hover:bg-yellow-50;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold;
+  }
+
+  /* Chips (tags/labels) */
+  .chip-rose {
+    @apply bg-rose-100 text-rose-600;
+  }
+  .chip-yellow {
+    @apply bg-yellow-100 text-yellow-600;
+  }
+
+  .card-emergency {
+  @apply border-2 border-rose-400 shadow-xl;
+}
+
+/* Normal campaign card */
+.card-normal {
+  @apply shadow-md;
+}
+
+/* Emergency Donate button */
+.btn-emergency {
+  @apply w-full rounded-md bg-rose-500 text-white font-semibold py-2 hover:bg-rose-600;
+}
+
+/* Normal Donate button */
+.btn-normal {
+  @apply w-full rounded-md bg-teal-400 text-white font-semibold py-2 hover:bg-teal-500;
+}
+.campaign-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 320px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.card-body {
+  flex-grow: 1; /* lets description expand without breaking layout */
+}
+
+.card-footer {
+  margin-top: auto; /* ensures footer stays aligned */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.progress-bar {
+  height: 8px;
+  background: #eee;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress {
+  height: 100%;
+  background: #27ae60;
+}
+
+}
