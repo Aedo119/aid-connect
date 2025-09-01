@@ -1,6 +1,6 @@
 // src/pages/DonorSignUp.jsx
 import { useState } from "react";
-import { Mail, Lock, User, Phone, MapPin, Check, Heart } from "lucide-react";
+import { Mail, Lock, User, Phone, MapPin, Check, Heart, Globe, Home } from "lucide-react";
 import Footer from "../components/Footer";
 
 export default function DonorSignUp() {
@@ -118,46 +118,61 @@ export default function DonorSignUp() {
             </div>
           </div>
 
-          {/* Location */}
+          {/* Address */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Location
+              Address
+            </label>
+            <div className="flex items-center border rounded-lg px-3 bg-gray-50 focus-within:ring-2 focus-within:ring-teal-400">
+              <Home className="h-5 w-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Enter your street address"
+                className="w-full p-2 bg-transparent outline-none"
+              />
+            </div>
+          </div>
+
+          {/* Postal Code */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Postal Code
             </label>
             <div className="flex items-center border rounded-lg px-3 bg-gray-50 focus-within:ring-2 focus-within:ring-teal-400">
               <MapPin className="h-5 w-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Enter your location"
+                placeholder="Enter your postal code"
                 className="w-full p-2 bg-transparent outline-none"
               />
             </div>
+          </div>
 
-            {/* Website */}
+          {/* Website */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Website
             </label>
             <div className="flex items-center border rounded-lg px-3 bg-gray-50 focus-within:ring-2 focus-within:ring-teal-400">
-              <MapPin className="h-5 w-5 text-gray-400" />
+              <Globe className="h-5 w-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="heeps://yourwebsite.com"
+                placeholder="https://yourwebsite.com"
                 className="w-full p-2 bg-transparent outline-none"
               />
             </div>
+          </div>
 
-            {/* Organization Description */}
-            <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Organization Description    
-                </label>
-                <textarea
-                    placeholder="Briefly describe your organization"
-                    className="w-full p-2 bg-transparent outline-none border rounded-lg px-3 bg-gray-50 focus-within:ring-2 focus-within:ring-teal-400"
-                    rows={3}
-                ></textarea>
-            </div>
-            </div>
+          {/* Organization Description */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Organization Description    
+            </label>
+            <textarea
+              placeholder="Briefly describe your organization"
+              className="w-full p-2 bg-transparent outline-none border rounded-lg px-3 bg-gray-50 focus-within:ring-2 focus-within:ring-teal-400"
+              rows={3}
+            ></textarea>
           </div>
 
           {/* Terms Agreement */}
