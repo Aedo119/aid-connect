@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { campaigns } from "../data/campaigns";
 
 export default function DonationPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const campaign = campaigns.find((c) => c.id === parseInt(id));
   const [selectedTab, setSelectedTab] = useState("story");
   const [donationType, setDonationType] = useState(
@@ -15,6 +16,11 @@ export default function DonationPage() {
   }
 
   const raisedPercent = Math.min((campaign.raised / campaign.goal) * 100, 100);
+
+  const handleDonateClick = () => {
+    // Navigate to the donation confirmation page with the selected type
+    navigate(`/donation-confirmation/${campaign.id}/${donationType}`);
+  };
 
   return (
     <div className="max-w-7xl mx-auto py-12 px-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -95,41 +101,40 @@ Every donation, no matter the size, makes a direct impact on the lives of earthq
           )}
           {selectedTab === "updates" && <p>No updates yet.</p>}
           {selectedTab === "donors" && (
-  <div>
-    <h3 className="font-semibold text-lg mb-4">Recent Donors</h3>
-    <ul className="space-y-4">
-      {[
-        { name: "Sarah M.", date: "1/20/2025", amount: 150, type: "Money" },
-        { name: "Anonymous", date: "1/19/2025", amount: 75, type: "Money" },
-        { name: "Michael C.", date: "1/18/2025", amount: 200, type: "Money" },
-        { name: "Emily R.", date: "1/17/2025", amount: 100, type: "Money" },
-        { name: "David L.", date: "1/16/2025", amount: 50, type: "Money" },
-      ].map((donor, index) => (
-        <li
-          key={index}
-          className="flex justify-between items-center border-b border-gray-200 pb-2"
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center font-bold text-gray-700">
-              {donor.name.charAt(0)}
-            </div>
             <div>
-              <p className="font-medium">{donor.name}</p>
-              <p className="text-xs text-gray-500">{donor.date}</p>
+              <h3 className="font-semibold text-lg mb-4">Recent Donors</h3>
+              <ul className="space-y-4">
+                {[
+                  { name: "Sarah M.", date: "1/20/2025", amount: 150, type: "Money" },
+                  { name: "Anonymous", date: "1/19/2025", amount: 75, type: "Money" },
+                  { name: "Michael C.", date: "1/18/2025", amount: 200, type: "Money" },
+                  { name: "Emily R.", date: "1/17/2025", amount: 100, type: "Money" },
+                  { name: "David L.", date: "1/16/2025", amount: 50, type: "Money" },
+                ].map((donor, index) => (
+                  <li
+                    key={index}
+                    className="flex justify-between items-center border-b border-gray-200 pb-2"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center font-bold text-gray-700">
+                        {donor.name.charAt(0)}
+                      </div>
+                      <div>
+                        <p className="font-medium">{donor.name}</p>
+                        <p className="text-xs text-gray-500">{donor.date}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold">${donor.amount}</span>
+                      <span className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded">
+                        {donor.type}
+                      </span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="font-bold">${donor.amount}</span>
-            <span className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded">
-              {donor.type}
-            </span>
-          </div>
-        </li>
-      ))}
-    </ul>
-  </div>
-)}
-
+          )}
         </div>
       </div>
 
@@ -173,9 +178,9 @@ Every donation, no matter the size, makes a direct impact on the lives of earthq
                   onClick={() => setDonationType(type.toLowerCase())}
                   className={`flex-1 py-2 rounded border ${
                     donationType === type.toLowerCase()
-                      ? "bg-green-50 border-green-500"
-                      : "border-gray-300"
-                  } text-green-700 font-semibold`}
+                      ? "bg-green-50 border-green-500 text-green-700"
+                      : "border-gray-300 text-gray-700"
+                  } font-semibold transition-colors`}
                 >
                   {type}
                 </button>
@@ -183,7 +188,10 @@ Every donation, no matter the size, makes a direct impact on the lives of earthq
             </div>
           </div>
 
-          <button className="w-full bg-red-600 text-white py-3 rounded font-semibold hover:bg-red-700 transition">
+          <button 
+            onClick={handleDonateClick}
+            className="w-full bg-red-600 text-white py-3 rounded font-semibold hover:bg-red-700 transition relative"
+          >
             Donate Now
           </button>
         </div>

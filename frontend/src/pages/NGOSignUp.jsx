@@ -16,7 +16,7 @@ export default function DonorSignUp() {
         <div className="bg-white/90 backdrop-blur-md p-8 rounded-2xl shadow-xl w-full max-w-md">
           {/* Heart Icon at the top */}
           <div className="flex justify-center mb-4">
-            <div className="bg-pink-100 p-3 rounded-full">
+            <div className="bg-rose-100 p-3 rounded-full">
               <Heart className="h-8 w-8 text-rose-500 fill-rose-500" />
             </div>
           </div>
