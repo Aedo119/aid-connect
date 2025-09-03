@@ -29,20 +29,36 @@ export default function DonorSignUp() {
             Start making a difference today with your donations.
           </p>
 
-          {/* Full Name */}
+          {/* First Name */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Full Name
+              First Name
             </label>
             <div className="flex items-center border rounded-lg px-3 bg-gray-50 focus-within:ring-2 focus-within:ring-teal-400">
               <User className="h-5 w-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Enter your full name"
+                placeholder="Enter your First name"
                 className="w-full p-2 bg-transparent outline-none"
               />
             </div>
           </div>
+
+          {/* Last Name */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Last Name
+            </label>
+            <div className="flex items-center border rounded-lg px-3 bg-gray-50 focus-within:ring-2 focus-within:ring-teal-400">
+              <User className="h-5 w-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Enter your Last name"
+                className="w-full p-2 bg-transparent outline-none"
+              />
+            </div>
+          </div>
+          
 
           {/* Email */}
           <div className="mb-4">
