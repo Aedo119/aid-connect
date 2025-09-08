@@ -86,11 +86,18 @@ The frontend will run on `http://localhost:5173`
 
 ### Backend API Endpoints
 
+**Authentication:**
+
 - `POST /auth/user/login` - User (Donor) login
 - `POST /auth/org/login` - Organization (NGO) login
 - `POST /auth/logout` - User logout
 - `POST /auth/refresh` - Refresh access token
 - `GET /auth/profile` - Get user profile (protected)
+
+**Registration:**
+
+- `POST /donor/signup` - User (Donor) registration
+- `POST /org/signup` - Organization (NGO) registration
 
 ### Frontend Features
 
