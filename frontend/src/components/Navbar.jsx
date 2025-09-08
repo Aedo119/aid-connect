@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { HashLink } from "react-router-hash-link";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const { user, logout, isAuthenticated } = useAuth();
 
   // Items for homepage scroll
   const sectionLinks = [
@@ -18,6 +20,11 @@ export default function Navbar() {
     { name: "Donor Login", path: "/donor-login" },
     { name: "NGO Login", path: "/ngo-login" },
   ];
+
+  const handleLogout = async () => {
+    await logout();
+    setOpen(false);
+  };
 
   return (
     <header className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-rose-500">
@@ -54,22 +61,40 @@ export default function Navbar() {
               {item.name}
             </HashLink>
           ))}
-          {/* Page Links (navigate) */}
-          {pageLinks.map((item) => (
-            <Link
-              key={item.name}
-              to={item.path}
-              className="hover:text-rose-500"
-            >
-              {item.name}
-            </Link>
-          ))}
-          <Link
-            to="/donor-signup"
-            className="px-4 py-2 rounded-md bg-rose-500 text-white font-medium hover:bg-rose-600 ml-2"
-          >
-            Get Started
-          </Link>
+          
+          {/* Conditional rendering based on auth status */}
+          {isAuthenticated ? (
+            <>
+              <span className="text-gray-600">
+                Welcome, {user?.email}
+              </span>
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 rounded-md bg-gray-500 text-white font-medium hover:bg-gray-600 ml-2"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              {/* Page Links (navigate) */}
+              {pageLinks.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.path}
+                  className="hover:text-rose-500"
+                >
+                  {item.name}
+                </Link>
+              ))}
+              <Link
+                to="/donor-signup"
+                className="px-4 py-2 rounded-md bg-rose-500 text-white font-medium hover:bg-rose-600 ml-2"
+              >
+                Get Started
+              </Link>
+            </>
+          )}
         </nav>
 
         {/* Mobile button */}
@@ -115,24 +140,42 @@ export default function Navbar() {
                 {item.name}
               </HashLink>
             ))}
-            {/* Page Links */}
-            {pageLinks.map((item) => (
-              <Link
-                key={item.name}
-                to={item.path}
-                className="block rounded-md px-3 py-2 hover:bg-rose-100"
-                onClick={() => setOpen(false)}
-              >
-                {item.name}
-              </Link>
-            ))}
-            <Link
-              to="/get-started"
-              className="block text-center px-4 py-2 rounded-md bg-rose-500 text-white font-medium hover:bg-rose-500"
-              onClick={() => setOpen(false)}
-            >
-              Get Started
-            </Link>
+            
+            {/* Conditional rendering based on auth status */}
+            {isAuthenticated ? (
+              <>
+                <div className="block rounded-md px-3 py-2 text-gray-600">
+                  Welcome, {user?.email}
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="block w-full text-center px-4 py-2 rounded-md bg-gray-500 text-white font-medium hover:bg-gray-600"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                {/* Page Links */}
+                {pageLinks.map((item) => (
+                  <Link
+                    key={item.name}
+                    to={item.path}
+                    className="block rounded-md px-3 py-2 hover:bg-rose-100"
+                    onClick={() => setOpen(false)}
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+                <Link
+                  to="/donor-signup"
+                  className="block text-center px-4 py-2 rounded-md bg-rose-500 text-white font-medium hover:bg-rose-600"
+                  onClick={() => setOpen(false)}
+                >
+                  Get Started
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}

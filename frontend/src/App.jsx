@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
 
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
@@ -46,33 +47,35 @@ function HomePage() {
 
 export default function App() {
   return (
-    <Router>
-      <div className="text-gray-800">
-        <Navbar />
+    <AuthProvider>
+      <Router>
+        <div className="text-gray-800">
+          <Navbar />
 
-        <Routes>
-          {/* Homepage */}
-          <Route path="/" element={<HomePage />} />
+          <Routes>
+            {/* Homepage */}
+            <Route path="/" element={<HomePage />} />
 
-          {/* Donation Page */}
-          <Route path="/donate/:id" element={<DonationPage />} />
+            {/* Donation Page */}
+            <Route path="/donate/:id" element={<DonationPage />} />
 
-          {/* Donor Sign Up Page */}
-          <Route path="/donor-signup" element={<DonorSignUp />} />
+            {/* Donor Sign Up Page */}
+            <Route path="/donor-signup" element={<DonorSignUp />} />
 
-          {/* Donor Login Page */}
-         <Route path="/donor-login" element={<DonorLogin />} />
+            {/* Donor Login Page */}
+           <Route path="/donor-login" element={<DonorLogin />} />
 
-          {/* NGO Sign Up Page */}
-          <Route path="/ngo-signup" element={<NGOSignUp />} />
+            {/* NGO Sign Up Page */}
+            <Route path="/ngo-signup" element={<NGOSignUp />} />
 
-          {/* NGO Login Page */}
-          <Route path="/ngo-login" element={<NGOLogin />} />
+            {/* NGO Login Page */}
+            <Route path="/ngo-login" element={<NGOLogin />} />
 
-          {/* Redirect unknown routes to home */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </div>
-    </Router>
+            {/* Redirect unknown routes to home */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </div>
+      </Router>
+    </AuthProvider>
   );
 }
