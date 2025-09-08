@@ -13,6 +13,7 @@ import DonationPage from "./pages/DonationPage.jsx";
 import NGOLogin from "./pages/NGOLogin.jsx";
 import DonorSignUp from "./pages/DonorSignUp.jsx";
 import NGOSignUp from "./pages/NGOSignUp.jsx";
+import DonationConfirmation from "./pages/DonationConfirmation.jsx";
 
 function HomePage() {
   return (
@@ -71,11 +72,13 @@ export default function App() {
             {/* NGO Login Page */}
             <Route path="/ngo-login" element={<NGOLogin />} />
 
-            {/* Redirect unknown routes to home */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </div>
-      </Router>
-    </AuthProvider>
+          {/* Donation Confirmation Page */}
+           <Route path="/donation-confirmation/:id/:type" element={<DonationConfirmation />} />
+
+          {/* Redirect unknown routes to home */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }

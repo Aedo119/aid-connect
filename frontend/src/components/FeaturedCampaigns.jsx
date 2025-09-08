@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { campaigns } from "../data/campaigns";
 import ProgressBar from "./ProgressBar";
 import { DollarSign, Package, Shirt, Cross, Heart } from "lucide-react";
@@ -28,10 +29,19 @@ function DonationIcon({ type }) {
     clothes: <Shirt className="h-4 w-4 text-blue-600" />,
     "medical supplies": <Cross className="h-4 w-4 text-red-600" />,
   };
-  return iconMap[type.toLowerCase()] || <Heart className="h-4 w-4 text-pink-600" />;
+  return iconMap[type.toLowerCase()] || <Heart className="h-4 w-4 text-rose-600" />;
 }
 
 export default function FeaturedCampaigns() {
+  const [selectedDonationTypes, setSelectedDonationTypes] = useState({});
+
+  const handleDonationTypeClick = (campaignId, donationType) => {
+    setSelectedDonationTypes(prev => ({
+      ...prev,
+      [campaignId]: donationType.toLowerCase()
+    }));
+  };
+
   return (
     <section className="py-12 md:py-14">
       <div className="mx-auto max-w-7xl px-4">
@@ -45,39 +55,45 @@ export default function FeaturedCampaigns() {
         <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {campaigns.map((c) => {
             const pct = (c.raised / c.goal) * 100;
+            const selectedType = selectedDonationTypes[c.id] || c.donationTypes[0].toLowerCase();
+            
             return (
               <article
                 key={c.id}
-                className={`card flex flex-col overflow-hidden ${
-                  c.labelLeft === "Emergency" ? "card-emergency" : "card-normal"
+                className={`flex flex-col overflow-hidden rounded-lg shadow-md transition-all hover:shadow-lg ${
+                  c.labelLeft === "Emergency" 
+                    ? "border-l-4 border-l-red-500" 
+                    : "border-l border-l-gray-200"
                 }`}
               >
                 {/* Image with badges */}
                 <div className="relative">
                   <img src={c.image} alt={c.title} className="h-44 w-full object-cover" />
                   {c.labelLeft && (
-                    <span className="chip absolute left-3 top-3 bg-red-600 text-white shadow">
+                    <span className="absolute left-3 top-3 rounded-full bg-red-600 px-2 py-1 text-xs font-medium text-white shadow">
                       {c.labelLeft}
                     </span>
                   )}
                   {c.labelRight && (
-                    <span className="chip absolute right-3 top-3 bg-rose-50 text-rose-500">
+                    <span className="absolute right-3 top-3 rounded-full bg-rose-50 px-2 py-1 text-xs font-medium text-rose-500">
                       {c.labelRight}
                     </span>
                   )}
                 </div>
 
                 {/* Body */}
-                <div className="flex-grow space-y-3 p-5">
-                  <h3 className="text-lg font-semibold leading-snug">{c.title}</h3>
-                  <p className="text-sm text-gray-600">{c.desc}</p>
+                <Link to={`/donate/${c.id}`} className="flex-grow space-y-3 p-5 cursor-pointer">
+                  <h3 className="text-lg font-semibold leading-snug hover:text-teal-600 transition-colors">
+                    {c.title}
+                  </h3>
+                  <p className="text-sm text-gray-600 line-clamp-2">{c.desc}</p>
                   <p className="text-xs text-gray-500">
                     by <span className="font-medium text-gray-700">{c.org}</span>
                   </p>
-                </div>
+                </Link>
 
                 {/* Footer */}
-                <div className="p-5 pt-0 space-y-3 border-t mt-auto">
+                <div className="p-5 pt-0 space-y-3 mt-auto">
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
                       <span className="font-semibold">${c.raised.toLocaleString()} raised</span>
@@ -98,27 +114,37 @@ export default function FeaturedCampaigns() {
 
                   {/* Donation type chips with icons */}
                   <div className="flex flex-wrap gap-2">
-                    {c.donationTypes.map((t) => (
-                      <span
-                        key={t}
-                        className="chip flex items-center gap-1 bg-gray-100 text-gray-700 px-2 py-1 rounded"
-                      >
-                        <DonationIcon type={t} />
-                        <span>{t}</span>
-                      </span>
-                    ))}
+                    {c.donationTypes.map((t) => {
+                      const typeKey = t.toLowerCase();
+                      const isSelected = selectedType === typeKey;
+                      
+                      return (
+                        <button
+                          key={t}
+                          onClick={() => handleDonationTypeClick(c.id, t)}
+                          className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors ${
+                            isSelected
+                              ? "bg-rose-100 text-rose-700 border border-rose-300"
+                              : "bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200"
+                          }`}
+                        >
+                          <DonationIcon type={t} />
+                          <span>{t}</span>
+                        </button>
+                      );
+                    })}
                   </div>
 
-<Link
-  to={`/donate/${c.id}`}
-  className={`block text-center w-full ${
-    c.labelLeft === "Emergency" ? "btn-emergency" : "btn-normal"
-  }`}
->
-  Donate Now
-</Link>
-
-
+                  <Link
+                    to={`/donation-confirmation/${c.id}/${selectedType}`}
+                    className={`block text-center w-full py-2 px-4 rounded-lg font-medium transition-colors ${
+                      c.labelLeft === "Emergency" 
+                        ? "bg-red-600 text-white hover:bg-red-700" 
+                        : "bg-teal-500 text-white hover:bg-teal-600"
+                    }`}
+                  >
+                    Donate Now
+                  </Link>
                 </div>
               </article>
             );
@@ -126,9 +152,12 @@ export default function FeaturedCampaigns() {
         </div>
 
         <div className="mt-8 flex justify-center">
-          <button className="btn px-5 py-2 border border-gray-300 bg-white hover:bg-gray-100">
+          <Link
+            to="/donate"
+            className="px-5 py-2 border border-gray-300 bg-white rounded-lg hover:bg-gray-100 transition-colors"
+          >
             View All Campaigns
-          </button>
+          </Link>
         </div>
       </div>
     </section>
