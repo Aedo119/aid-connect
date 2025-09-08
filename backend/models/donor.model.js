@@ -14,8 +14,8 @@ export const createDonor = async (userData) => {
 
   const query = `
     INSERT INTO users 
-    (first_name,last_name, email, password_hash, phone_number, address_line1, postal_code)
-    VALUES (?, ?, ?, ?, ?, ?,?)
+    (first_name,last_name, email, password_hash, phone_number, address_line1, postal_code,role)
+    VALUES (?, ?, ?, ?, ?, ?,?,?)
   `;
 
   const values = [
@@ -26,6 +26,7 @@ export const createDonor = async (userData) => {
     phoneNumber,
     address,
     postalCode,
+    "Organization",
   ];
 
   try {
