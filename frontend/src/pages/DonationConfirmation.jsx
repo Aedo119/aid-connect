@@ -14,7 +14,8 @@ import {
   Smartphone,
   Building,
   QrCode,
-  Info
+  Info,
+  AlertCircle
 } from 'lucide-react';
 
 const donationTypeInfo = {
@@ -48,12 +49,42 @@ const donationTypeInfo = {
   }
 };
 
+// Medical supplies checklist items
+const medicalSuppliesChecklist = [
+  "Bandages & Gauze",
+  "Antiseptics",
+  "Pain Relief Medication",
+  "First Aid Kits",
+  "Thermometers",
+  "Blood Pressure Monitors",
+  "Syrringes (unused)",
+  "Medical Gloves",
+  "Face Masks",
+  "Wheelchairs",
+  "Crutches",
+  "Walking Aids"
+];
+
+// Clothing types checklist
+const clothingTypes = [
+  "Adult Clothing",
+  "Children's Clothing",
+  "Baby Clothing",
+  "Shoes",
+  "Accessories",
+  "Winter Wear",
+  "Professional Wear",
+  "Sportswear"
+];
+
 export default function DonationConfirmation() {
   const { id, type } = useParams();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [donationType] = useState(type || 'money');
   const [agreeToTerms, setAgreeToTerms] = useState(false);
+  const [selectedMedicalItems, setSelectedMedicalItems] = useState([]);
+  const [selectedClothingTypes, setSelectedClothingTypes] = useState([]);
   const [formData, setFormData] = useState({
     amount: '',
     customAmount: '',
@@ -88,6 +119,22 @@ export default function DonationConfirmation() {
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
+  };
+
+  const handleMedicalItemSelect = (item) => {
+    if (selectedMedicalItems.includes(item)) {
+      setSelectedMedicalItems(selectedMedicalItems.filter(i => i !== item));
+    } else {
+      setSelectedMedicalItems([...selectedMedicalItems, item]);
+    }
+  };
+
+  const handleClothingTypeSelect = (item) => {
+    if (selectedClothingTypes.includes(item)) {
+      setSelectedClothingTypes(selectedClothingTypes.filter(i => i !== item));
+    } else {
+      setSelectedClothingTypes([...selectedClothingTypes, item]);
+    }
   };
 
   const nextStep = () => setStep(step + 1);
@@ -221,7 +268,12 @@ export default function DonationConfirmation() {
       case 1:
         return (
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-800">Food Donation Details</h2>
+            <h2 className="text-2xl font-bold text-gray-800">
+              {donationType === 'clothes' ? 'Clothing Donation' : 
+               donationType === 'food' ? 'Food Donation' :
+               donationType === 'medical supplies' ? 'Medical Supplies Donation' :
+               'Donation Details'}
+            </h2>
             
             {/* Show error if donation type is not available for this campaign */}
             {!isDonationTypeAvailable && (
@@ -428,22 +480,27 @@ export default function DonationConfirmation() {
             {donationType === 'clothes' && (
               <>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Type of Clothing
-                  </label>
-                  <input
-                    type="text"
-                    name="clothingType"
-                    value={formData.clothingType}
-                    onChange={handleInputChange}
-                    placeholder="e.g., winter coats, children's clothes, etc."
-                    className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-rose-300"
-                  />
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Clothing Types</h3>
+                  <div className="grid grid-cols-2 gap-3 mb-6">
+                    {clothingTypes.map((item) => (
+                      <div key={item} className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id={`clothing-${item.replace(/\s+/g, '-').toLowerCase()}`}
+                          checked={selectedClothingTypes.includes(item)}
+                          onChange={() => handleClothingTypeSelect(item)}
+                          className="h-5 w-5 text-rose-500 rounded-full mr-2"
+                        />
+                        <label htmlFor={`clothing-${item.replace(/\s+/g, '-').toLowerCase()}`} className="text-sm text-gray-700">
+                          {item}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Condition
-                  </label>
+
+                <div className="mb-6">
+                  <h4 className="text-md font-medium text-gray-700 mb-2">Condition</h4>
                   <select
                     name="clothingCondition"
                     value={formData.clothingCondition}
@@ -457,57 +514,138 @@ export default function DonationConfirmation() {
                     <option value="fair">Fair</option>
                   </select>
                 </div>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="pickupRequested"
-                    name="pickupRequested"
-                    checked={formData.pickupRequested}
-                    onChange={handleInputChange}
-                    className="h-4 w-4 text-rose-500 rounded"
-                  />
-                  <label htmlFor="pickupRequested" className="text-sm text-gray-700">
-                    I need pickup service for my donation
-                  </label>
-                </div>
-              </>
-            )}
-            
-            {donationType === 'medical-supplies' && (
-              <>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Medical Items
-                  </label>
-                  <textarea
-                    name="medicalItems"
-                    value={formData.medicalItems}
-                    onChange={handleInputChange}
-                    placeholder="List the medical supplies you're donating"
-                    className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-rose-300 h-20"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Expiry Date (if applicable)
-                  </label>
-                  <input
-                    type="date"
-                    name="expiryDate"
-                    value={formData.expiryDate}
+
+                <div className="mb-6">
+                  <h4 className="text-md font-medium text-gray-700 mb-2">Drop-off Instructions</h4>
+                  <select
+                    name="dropoffLocation"
+                    value={formData.dropoffLocation}
                     onChange={handleInputChange}
                     className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-rose-300"
-                  />
+                  >
+                    <option value="">Select drop-off location</option>
+                    <option value="central-warehouse">Central Warehouse - 123 Main St</option>
+                    <option value="north-distribution">North Distribution Center - 456 Oak Ave</option>
+                    <option value="south-community">South Community Center - 789 Pine Rd</option>
+                    <option value="east-shelter">East Shelter - 101 Elm Blvd</option>
+                  </select>
                 </div>
+
+                <div className="bg-orange-50 p-4 rounded-lg border border-orange-200 mb-6">
+                  <div className="flex items-start gap-2 mb-3">
+                    <Info className="h-5 w-5 text-orange-600 mt-0.5 flex-shrink-0" />
+                    <h3 className="font-medium text-orange-800">Donation Guidelines:</h3>
+                  </div>
+                  <ul className="text-sm text-orange-700 space-y-2 list-disc list-inside">
+                    <li>Items should be clean and in good condition</li>
+                    <li>Please wash all items before donating</li>
+                    <li>Sort items by type and size if possible</li>
+                    <li>Pack in clean bags or boxes</li>
+                    <li>Remove any personal items from pockets</li>
+                  </ul>
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Special Handling Requirements
+                    Special Instructions (Optional)
                   </label>
                   <textarea
                     name="specialInstructions"
                     value={formData.specialInstructions}
                     onChange={handleInputChange}
-                    placeholder="Any special handling or storage requirements"
+                    placeholder="Any special notes about your donation"
+                    className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-rose-300 h-20"
+                  />
+                </div>
+              </>
+            )}
+            
+            {donationType === 'medical supplies' && (
+              <>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Medical Supplies Checklist</h3>
+                  <div className="grid grid-cols-2 gap-3 mb-6">
+                    {medicalSuppliesChecklist.map((item) => (
+                      <div key={item} className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id={item.replace(/\s+/g, '-').toLowerCase()}
+                          checked={selectedMedicalItems.includes(item)}
+                          onChange={() => handleMedicalItemSelect(item)}
+                          className="h-5 w-5 text-rose-500 rounded-full mr-2"
+                        />
+                        <label htmlFor={item.replace(/\s+/g, '-').toLowerCase()} className="text-sm text-gray-700">
+                          {item}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-red-50 p-4 rounded-lg border border-red-200 mb-6">
+                  <div className="flex items-start gap-2 mb-3">
+                    <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+                    <h3 className="font-medium text-red-800">Expiry Date Validation</h3>
+                  </div>
+                  <p className="text-sm text-red-700 mb-2 font-medium">Important:</p>
+                  <p className="text-sm text-red-700 mb-3">
+                    All medical supplies must have at least 6 months before expiration. Items past expiry cannot be accepted for safety reasons.
+                  </p>
+                  <div>
+                    <label className="block text-sm font-medium text-red-700 mb-2">
+                      Earliest Expiry Date of Items
+                    </label>
+                    <input
+                      type="date"
+                      name="expiryDate"
+                      value={formData.expiryDate}
+                      onChange={handleInputChange}
+                      className="w-full p-3 border border-red-300 rounded-lg focus:ring-2 focus:ring-red-300 bg-white"
+                    />
+                  </div>
+                </div>
+
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Condition & Storage
+                  </label>
+                  <select
+                    name="medicalCondition"
+                    value={formData.medicalCondition}
+                    onChange={handleInputChange}
+                    className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-rose-300"
+                  >
+                    <option value="">Select condition</option>
+                    <option value="new-unopened">New & Unopened</option>
+                    <option value="sterile">Sterile & Sealed</option>
+                    <option value="good">Good Condition</option>
+                    <option value="requires-special-handling">Requires Special Handling</option>
+                  </select>
+                </div>
+
+                <div className="flex items-center gap-2 mb-6">
+                  <input
+                    type="checkbox"
+                    id="pickupRequestedMedical"
+                    name="pickupRequested"
+                    checked={formData.pickupRequested}
+                    onChange={handleInputChange}
+                    className="h-5 w-5 text-rose-500 rounded-full"
+                  />
+                  <label htmlFor="pickupRequestedMedical" className="text-sm text-gray-700">
+                    Request pickup service (for large or heavy items)
+                  </label>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Special Instructions
+                  </label>
+                  <textarea
+                    name="specialInstructions"
+                    value={formData.specialInstructions}
+                    onChange={handleInputChange}
+                    placeholder="Storage requirements, handling instructions, or other important notes"
                     className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-rose-300 h-20"
                   />
                 </div>
@@ -621,10 +759,12 @@ export default function DonationConfirmation() {
                 
                 {donationType === 'clothes' && (
                   <>
-                    {formData.clothingType && (
+                    {selectedClothingTypes.length > 0 && (
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Clothing Type:</span>
-                        <span className="font-medium">{formData.clothingType}</span>
+                        <span className="text-gray-600">Clothing Types:</span>
+                        <span className="font-medium text-right">
+                          {selectedClothingTypes.join(', ')}
+                        </span>
                       </div>
                     )}
                     {formData.clothingCondition && (
@@ -633,25 +773,51 @@ export default function DonationConfirmation() {
                         <span className="font-medium capitalize">{formData.clothingCondition}</span>
                       </div>
                     )}
+                    {formData.dropoffLocation && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Drop-off Location:</span>
+                        <span className="font-medium capitalize">
+                          {formData.dropoffLocation === 'central-warehouse' && 'Central Warehouse'}
+                          {formData.dropoffLocation === 'north-distribution' && 'North Distribution Center'}
+                          {formData.dropoffLocation === 'south-community' && 'South Community Center'}
+                          {formData.dropoffLocation === 'east-shelter' && 'East Shelter'}
+                        </span>
+                      </div>
+                    )}
+                  </>
+                )}
+                
+                {donationType === 'medical supplies' && (
+                  <>
+                    {selectedMedicalItems.length > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Medical Items:</span>
+                        <span className="font-medium text-right">
+                          {selectedMedicalItems.join(', ')}
+                        </span>
+                      </div>
+                    )}
+                    {formData.expiryDate && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Earliest Expiry Date:</span>
+                        <span className="font-medium">{formData.expiryDate}</span>
+                      </div>
+                    )}
+                    {formData.medicalCondition && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Condition:</span>
+                        <span className="font-medium capitalize">
+                          {formData.medicalCondition === 'new-unopened' && 'New & Unopened'}
+                          {formData.medicalCondition === 'sterile' && 'Sterile & Sealed'}
+                          {formData.medicalCondition === 'good' && 'Good Condition'}
+                          {formData.medicalCondition === 'requires-special-handling' && 'Requires Special Handling'}
+                        </span>
+                      </div>
+                    )}
                     <div className="flex justify-between">
                       <span className="text-gray-600">Pickup Requested:</span>
                       <span className="font-medium">{formData.pickupRequested ? 'Yes' : 'No'}</span>
                     </div>
-                  </>
-                )}
-                
-                {donationType === 'medical-supplies' && formData.medicalItems && (
-                  <>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Medical Items:</span>
-                      <span className="font-medium">{formData.medicalItems}</span>
-                    </div>
-                    {formData.expiryDate && (
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Expiry Date:</span>
-                        <span className="font-medium">{formData.expiryDate}</span>
-                      </div>
-                    )}
                   </>
                 )}
                 
@@ -669,7 +835,7 @@ export default function DonationConfirmation() {
                 type="checkbox"
                 checked={agreeToTerms}
                 onChange={() => setAgreeToTerms(!agreeToTerms)}
-                className="mt-1 h-4 w-4 text-rose-500 rounded"
+                className="mt-1 h-5 w-5 text-rose-500 rounded-full"
               />
               <span className="text-sm text-gray-700">
                 I confirm that all information provided is accurate and I agree to the terms of this donation.
@@ -727,6 +893,10 @@ export default function DonationConfirmation() {
                     {formData.dropoffLocation === 'south-community' && ' South Community Center'}
                     {formData.dropoffLocation === 'east-shelter' && ' East Shelter'}
                   </p>
+                )}
+
+                {donationType === 'medical supplies' && formData.pickupRequested && (
+                  <p><strong>Pickup Service:</strong> Requested</p>
                 )}
               </div>
             </div>
