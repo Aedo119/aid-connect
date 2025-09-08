@@ -1,4 +1,9 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 
 import Navbar from "./components/Navbar";
@@ -45,7 +50,6 @@ function HomePage() {
   );
 }
 
-
 export default function App() {
   return (
     <AuthProvider>
@@ -64,7 +68,7 @@ export default function App() {
             <Route path="/donor-signup" element={<DonorSignUp />} />
 
             {/* Donor Login Page */}
-           <Route path="/donor-login" element={<DonorLogin />} />
+            <Route path="/donor-login" element={<DonorLogin />} />
 
             {/* NGO Sign Up Page */}
             <Route path="/ngo-signup" element={<NGOSignUp />} />
@@ -72,13 +76,17 @@ export default function App() {
             {/* NGO Login Page */}
             <Route path="/ngo-login" element={<NGOLogin />} />
 
-          {/* Donation Confirmation Page */}
-           <Route path="/donation-confirmation/:id/:type" element={<DonationConfirmation />} />
+            {/* Donation Confirmation Page */}
+            <Route
+              path="/donation-confirmation/:id/:type"
+              element={<DonationConfirmation />}
+            />
 
-          {/* Redirect unknown routes to home */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </div>
-    </Router>
+            {/* Redirect unknown routes to home */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </div>
+      </Router>
+    </AuthProvider>
   );
 }
