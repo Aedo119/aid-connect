@@ -10,7 +10,7 @@ import {
   storeTokens,
   rotateRefreshToken,
   findSessionByToken,
-} from "../models/common.model.js";
+} from "../models/session.model.js";
 
 const router = express.Router();
 

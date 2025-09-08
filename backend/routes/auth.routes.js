@@ -6,7 +6,7 @@ import {
   refreshToken,
   getProfile,
   verifyToken,
-} from "../controllers/common.controller.js";
+} from "../controllers/session.controller.js";
 
 const router = express.Router();
 
