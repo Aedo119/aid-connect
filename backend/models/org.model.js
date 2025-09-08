@@ -1,5 +1,5 @@
 // models/userModel.js
-import { pool } from "../server.js"; // your db connection (not from server.js)
+import { pool } from "../server.js"; 
 
 export const createOrg = async (userData) => {
   const {
