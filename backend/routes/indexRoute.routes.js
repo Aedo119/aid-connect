@@ -10,6 +10,6 @@ router.use("/auth", authRoutes);
 
 // Other routes
 router.use("/org", orgRoutes);
-router.use("/donor", donorRoutes);
+router.use("/user", donorRoutes);
 
 export default router;

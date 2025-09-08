@@ -83,6 +83,26 @@ export const authAPI = {
       throw error.response?.data || error.message;
     }
   },
+
+  // User (Donor) Signup
+  userSignup: async (userData) => {
+    try {
+      const response = await api.post("/user/signup", userData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  // Organization (NGO) Signup
+  orgSignup: async (orgData) => {
+    try {
+      const response = await api.post("/org/signup", orgData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
 };
 
 export default api;

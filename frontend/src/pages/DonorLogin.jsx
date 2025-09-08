@@ -30,7 +30,7 @@ export default function DonorLogin() {
     try {
       const result = await userLogin(formData.email, formData.password);
       if (result.success) {
-        navigate("/user");
+        navigate("/");
       } else {
         setError(result.message);
       }
