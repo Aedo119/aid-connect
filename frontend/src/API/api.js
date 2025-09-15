@@ -38,6 +38,7 @@ export const authAPI = {
   userLogin: async (email, password) => {
     try {
       const response = await api.post("/auth/user/login", { email, password });
+     
       return response.data;
     } catch (error) {
       throw error.response?.data || error.message;

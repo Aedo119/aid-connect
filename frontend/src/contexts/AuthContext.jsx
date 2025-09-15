@@ -25,13 +25,13 @@ export const AuthProvider = ({ children }) => {
       // Try donor profile first
       const donorResponse = await authAPI.getDonorProfile();
       setUser(donorResponse.user);
-      console.log(donorResponse.user);
+     
     } catch (donorError) {
       try {
         // If donor fails, try org profile
         const orgResponse = await authAPI.getOrgProfile();
         setUser(orgResponse.user);
-        console.log(orgResponse.user);
+    
       } catch (orgError) {
         setUser(null);
       }

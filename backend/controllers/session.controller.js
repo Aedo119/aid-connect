@@ -24,6 +24,7 @@ const generateAccessToken = (user) => {
       id: user.id,
       email: user.email,
       type: user.type,
+      name:user.name
     },
     JWT_SECRET,
     { expiresIn: "15m" }
@@ -94,7 +95,7 @@ export const userLogin = async (req, res) => {
 
   return res.status(200).json({
     message: "User logged in successfully",
-    user: { id: user.id, email: user.email, type: user.type },
+    user: { id: user.id, email: user.email, type: user.type ,name:user.name},
   });
 };
 
@@ -149,6 +150,7 @@ export const orgLogin = async (req, res) => {
       id: organization.id,
       email: organization.email,
       type: organization.type,
+      name:organization.name
     },
   });
 };
