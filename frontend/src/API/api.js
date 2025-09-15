@@ -65,9 +65,18 @@ export const authAPI = {
   },
 
   // Get user profile
-  getProfile: async () => {
+  getDonorProfile: async () => {
     try {
-      const response = await api.get("/auth/profile");
+      const response = await api.get("/donor/profile");
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  getOrgProfile: async () => {
+    try {
+      const response = await api.get("/org/profile");
       return response.data;
     } catch (error) {
       throw error.response?.data || error.message;
@@ -87,7 +96,7 @@ export const authAPI = {
   // User (Donor) Signup
   userSignup: async (userData) => {
     try {
-      const response = await api.post("/user/signup", userData);
+      const response = await api.post("/donor/signup", userData);
       return response.data;
     } catch (error) {
       throw error.response?.data || error.message;

@@ -1,5 +1,5 @@
 // models/userModel.js
-import { pool } from "../server.js"; 
+import { pool } from "../server.js";
 
 export const createOrg = async (userData) => {
   const {
@@ -35,5 +35,23 @@ export const createOrg = async (userData) => {
     return res; // nothing on success
   } catch (error) {
     throw error; // let controller handle error
+  }
+};
+
+export const getProfileDetails = async (email) => {
+  const query = `
+    SELECT *
+    FROM Organizations
+    WHERE email = ?
+    LIMIT 1
+  `;
+  try {
+    const [rows] = await pool.query(query, [email]);
+    if (rows.length === 0) {
+      return null;
+    }
+    return rows[0];
+  } catch (error) {
+    throw error;
   }
 };

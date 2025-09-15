@@ -36,3 +36,21 @@ export const createDonor = async (userData) => {
     throw error; // let controller handle error
   }
 };
+
+export const getProfileDetails = async (email) => {
+  const query = `
+    SELECT *
+    FROM Users
+    WHERE email = ?
+    LIMIT 1
+  `;
+  try {
+    const [rows] = await pool.query(query, [email]);
+    if (rows.length === 0) {
+      return null;
+    }
+    return rows[0];
+  } catch (error) {
+    throw error;
+  }
+};

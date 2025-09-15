@@ -66,7 +66,7 @@ export default function Navbar() {
           {isAuthenticated ? (
             <>
               <span className="text-gray-600">
-                Welcome, {user?.email}
+                Welcome, {user?.name}
               </span>
               <button
                 onClick={handleLogout}
