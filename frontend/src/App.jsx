@@ -21,6 +21,7 @@ import NGOSignUp from "./pages/NGOSignUp.jsx";
 import DonationConfirmation from "./pages/DonationConfirmation.jsx";
 import { authAPI } from "./API/api.js";
 import { useEffect } from "react";
+import NGODashboard from "./pages/NGODashboard.jsx";
 
 function HomePage() {
 
@@ -89,6 +90,9 @@ export default function App() {
               path="/donation-confirmation/:id/:type"
               element={<DonationConfirmation />}
             />
+
+            {/* NGO Dashboard - To be implemented */}
+            <Route path="/ngo-dashboard" element={<NGODashboard />} /> 
 
             {/* Redirect unknown routes to home */}
             <Route path="*" element={<Navigate to="/" replace />} />
