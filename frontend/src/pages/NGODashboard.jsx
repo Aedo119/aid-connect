@@ -123,7 +123,7 @@ export default function NGODashboard() {
       case 'money': return <DollarSign className="h-4 w-4 text-blue-500" />;
       case 'food': return <Apple className="h-4 w-4 text-green-500" />;
       case 'clothes': return <Shirt className="h-4 w-4 text-orange-500" />;
-      case 'medical-supplies': return <Cross className="h-4 w-4 text-red-500" />;
+      case 'medical supplies': return <Cross className="h-4 w-4 text-red-500" />;
       default: return <Package className="h-4 w-4 text-gray-500" />;
     }
   };
