@@ -22,10 +22,19 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuthStatus = async () => {
     try {
-      const response = await authAPI.getProfile();
-      setUser(response.user);
-    } catch (error) {
-      setUser(null);
+      // Try donor profile first
+      const donorResponse = await authAPI.getDonorProfile();
+      setUser(donorResponse.user);
+     
+    } catch (donorError) {
+      try {
+        // If donor fails, try org profile
+        const orgResponse = await authAPI.getOrgProfile();
+        setUser(orgResponse.user);
+    
+      } catch (orgError) {
+        setUser(null);
+      }
     } finally {
       setLoading(false);
     }

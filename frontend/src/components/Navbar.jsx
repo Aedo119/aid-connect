@@ -66,7 +66,7 @@ export default function Navbar() {
           {isAuthenticated ? (
             <>
               <span className="text-gray-600">
-                Welcome, {user?.email}
+                Welcome, {user.name}
               </span>
               <button
                 onClick={handleLogout}
@@ -145,7 +145,7 @@ export default function Navbar() {
             {isAuthenticated ? (
               <>
                 <div className="block rounded-md px-3 py-2 text-gray-600">
-                  Welcome, {user?.email}
+                  Welcome, {user?.name}
                 </div>
                 <button
                   onClick={handleLogout}

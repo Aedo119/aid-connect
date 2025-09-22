@@ -1,8 +1,7 @@
 // controllers/userController.js
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
-import { createDonor } from "../models/donor.model.js";
-
+import { createDonor, getProfileDetails } from "../models/donor.model.js";
 
 const IV_LENGTH = 16;
 
@@ -51,4 +50,14 @@ export const signup = async (req, res) => {
     console.error("Signup Error:", error);
     res.status(401).json({ error: "Something went wrong in creating user" });
   }
+};
+
+export const getProfile = async (req, res) => {
+  // This endpoint is protected by verifyToken middleware
+  const [user] = await getProfileDetails(req.user.email);
+  console.log(user);
+  res.json({
+    user: user,
+    message: "Profile retrieved successfully",
+  });
 };

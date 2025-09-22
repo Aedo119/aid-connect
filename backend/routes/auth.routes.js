@@ -6,7 +6,7 @@ import {
   refreshToken,
   getProfile,
   verifyToken,
-} from "../controllers/common.controller.js";
+} from "../controllers/session.controller.js";
 
 const router = express.Router();
 
@@ -15,6 +15,6 @@ router.post("/user/login", userLogin);
 router.post("/org/login", orgLogin);
 router.post("/logout", logout);
 router.post("/refresh", refreshToken);
-router.get("/profile", verifyToken, getProfile);
+
 
 export default router;

@@ -1,7 +1,7 @@
 // controllers/userController.js
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
-import { createOrg } from "../models/org.model.js";
+import { createOrg, getProfileDetails } from "../models/org.model.js";
 
 const IV_LENGTH = 16;
 
@@ -35,7 +35,7 @@ export const signup = async (req, res) => {
     const encryptedData = {
       name: encrypt(name),
       description: encrypt(description),
-      websiteUrl:encrypt(websiteUrl),
+      websiteUrl: encrypt(websiteUrl),
       email: encrypt(email),
       phoneNumber: encrypt(phoneNumber),
       address: encrypt(address),
@@ -47,9 +47,23 @@ export const signup = async (req, res) => {
     if (!result) {
       return res.status(500).json({ error: "Failed to connect to db" });
     }
-    return res.status(201).json({ message: "Organization registered successfully" });
+    return res
+      .status(201)
+      .json({ message: "Organization registered successfully" });
   } catch (error) {
     console.error("Signup Error:", error);
-    res.status(401).json({ error: "Something went wrong in registering organization" });
+    res
+      .status(401)
+      .json({ error: "Something went wrong in registering organization" });
   }
+};
+
+export const getProfile = async (req, res) => {
+  // This endpoint is protected by verifyToken middleware
+  const [user] = await getProfileDetails(req.user.email);
+  console.log(user);
+  res.json({
+    user: user,
+    message: "Profile retrieved successfully",
+  });
 };

@@ -54,11 +54,15 @@ export const validateUser = async ({ email, password }) => {
   }
 
   console.log("User validation successful");
+
+  let name=decrypt(foundUser.first_name)
+
   // Return user data with decrypted email
   return {
     id: foundUser.id,
     email: email, // Use the original email, not the encrypted one
     type: "user",
+    name:name
   };
 };
 
@@ -100,11 +104,14 @@ export const validateOrganization = async ({ email, password }) => {
   }
 
   console.log("Organization validation successful");
+  let name=decrypt(foundOrg.name);
+  
   // Return organization data with decrypted email
   return {
     id: foundOrg.id,
     email: email, // Use the original email, not the encrypted one
     type: "organization",
+    name:name
   };
 };
 
