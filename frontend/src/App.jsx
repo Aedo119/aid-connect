@@ -19,6 +19,7 @@ import NGOLogin from "./pages/NGOLogin.jsx";
 import DonorSignUp from "./pages/DonorSignUp.jsx";
 import NGOSignUp from "./pages/NGOSignUp.jsx";
 import DonationConfirmation from "./pages/DonationConfirmation.jsx";
+import NGODashboard from "./pages/NGODashboard.jsx";
 
 function HomePage() {
   return (
@@ -81,6 +82,9 @@ export default function App() {
               path="/donation-confirmation/:id/:type"
               element={<DonationConfirmation />}
             />
+
+            {/* NGO Dashboard - To be implemented */}
+            <Route path="/ngo-dashboard" element={<NGODashboard />} /> 
 
             {/* Redirect unknown routes to home */}
             <Route path="*" element={<Navigate to="/" replace />} />
