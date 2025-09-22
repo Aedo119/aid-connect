@@ -19,9 +19,17 @@ import NGOLogin from "./pages/NGOLogin.jsx";
 import DonorSignUp from "./pages/DonorSignUp.jsx";
 import NGOSignUp from "./pages/NGOSignUp.jsx";
 import DonationConfirmation from "./pages/DonationConfirmation.jsx";
+import { authAPI } from "./API/api.js";
+import { useEffect } from "react";
 import NGODashboard from "./pages/NGODashboard.jsx";
 
 function HomePage() {
+
+
+  useEffect(async()=>{
+    const response=await authAPI.refresh();
+    
+  })
   return (
     <>
       <section id="hero">
