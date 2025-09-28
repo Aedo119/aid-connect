@@ -140,26 +140,7 @@ export default function NGODashboard() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-green-200 via-teal-400 to-rose-400">
-      {/* Header */}
-      <header className="bg-white/90 backdrop-blur-md shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center">
-              <Heart className="h-8 w-8 text-rose-500 fill-rose-500 mr-2" />
-              <h1 className="text-2xl font-bold text-gray-800">NGO Dashboard</h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-700">Welcome, {currentUser?.name || "NGO Admin"}</span>
-              <button
-                onClick={handleLogout}
-                className="bg-rose-500 text-white px-4 py-2 rounded-lg hover:bg-rose-600 transition"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+
 
       {/* Main Content */}
       <main className="flex-1 py-8">

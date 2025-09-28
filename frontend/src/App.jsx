@@ -26,10 +26,10 @@ import NGODashboard from "./pages/NGODashboard.jsx";
 function HomePage() {
 
 
-  useEffect(async()=>{
-    const response=await authAPI.refresh();
+  // useEffect(async()=>{
+  //   const response=await authAPI.refresh();
     
-  })
+  // })
   return (
     <>
       <section id="hero">
