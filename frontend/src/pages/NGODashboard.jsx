@@ -198,13 +198,25 @@ export default function NGODashboard() {
   };
 
   const handleEditCampaign = (id) => {
-    navigate(`/edit-campaign/${id}`);
-  };
+  const campaign = campaigns.find(c => c.id === id);
+  navigate(`/edit-campaign/${id}`, { state: { campaign } });
+};
 
-  const handleDeleteCampaign = (id) => {
-    // In a real app, this would call an API
-    setCampaigns(campaigns.filter(campaign => campaign.id !== id));
-  };
+
+  const handleDeleteCampaign = async (id) => {
+  if (!window.confirm("Are you sure you want to delete this campaign?")) return;
+
+  try {
+    // Simulate API call
+    // await fetch(`/api/campaigns/${id}`, { method: "DELETE" });
+
+    setCampaigns(prev => prev.filter(c => c.id !== id));
+  } catch (error) {
+    console.error("Failed to delete campaign", error);
+    alert("Failed to delete campaign. Please try again.");
+  }
+};
+
 
   const getDonationTypeIcon = (type) => {
     switch(type) {
@@ -217,9 +229,29 @@ export default function NGODashboard() {
   };
 
   const exportReports = () => {
-    // In a real app, this would generate and download CSV/PDF reports
-    alert("Reports exported successfully! In a real application, this would download CSV/PDF files.");
-  };
+  // Prepare CSV content
+  let csv = "Campaign Title,Description,Raised,Goal,Donors,Status,Type\n";
+  campaigns.forEach(c => {
+    csv += `"${c.title}","${c.description}",${c.raised},${c.goal},${c.donors},${c.status},${c.type}\n`;
+  });
+
+  csv += "\nDonations:\n";
+  csv += "Donor,Type,Amount/Items,Date,Campaign\n";
+  donations.forEach(d => {
+    csv += `"${d.donor}",${d.type},"${d.amount || d.items}",${d.date},"${d.campaign}"\n`;
+  });
+
+  // Convert to Blob and trigger download
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "ngo_reports.csv";
+  link.click();
+  URL.revokeObjectURL(url);
+};
+
+
 
   const renderAnalyticsView = () => {
     return (
