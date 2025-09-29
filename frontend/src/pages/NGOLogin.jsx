@@ -34,7 +34,7 @@ export default function NGOLogin() {
       } else {
         setError(result.message);
       }
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred");
     } finally {
       setLoading(false);
