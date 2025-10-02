@@ -194,7 +194,7 @@ export default function NGODashboard() {
   };
 
   const handleCreateCampaign = () => {
-    navigate("/create-campaign");
+    navigate("/new-campaign");
   };
 
   const handleEditCampaign = (id) => {

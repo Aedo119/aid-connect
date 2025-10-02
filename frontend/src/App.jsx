@@ -21,7 +21,7 @@ import NGOSignUp from "./pages/NGOSignUp.jsx";
 import DonationConfirmation from "./pages/DonationConfirmation.jsx";
 import NGODashboard from "./pages/NGODashboard.jsx";
 import EditCampaign from "./pages/EditCampaign.jsx";
-
+import NewCampaign from "./pages/NewCampaign.jsx";
 function HomePage() {
 
 
@@ -90,11 +90,14 @@ export default function App() {
               element={<DonationConfirmation />}
             />
 
-            {/* NGO Dashboard - To be implemented */}
+            {/* NGO Dashboard */}
             <Route path="/ngo-dashboard" element={<NGODashboard />} />
 
             {/* Edit Campaign Page */}
             <Route path="/edit-campaign/:id" element={<EditCampaign />} />
+
+            {/* New Campaign Page*/}
+            <Route path="/new-campaign" element={<NewCampaign />} />
 
             {/* Redirect unknown routes to home */}
             <Route path="*" element={<Navigate to="/" replace />} />
