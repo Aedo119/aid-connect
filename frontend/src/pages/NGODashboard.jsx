@@ -16,7 +16,8 @@ import {
   PieChart,
   BarChart,
   Calendar,
-  Download
+  Download,
+  Eye
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -66,7 +67,8 @@ const mockCampaigns = [
     createdDate: "2025-07-20",
     endDate: "2025-08-28"
   },
-  {    id: 4,
+  {    
+    id: 4,
     title: "Healthcare Access for Rural Communities",
     description: "Setting up mobile clinics to provide essential healthcare services.", 
     progress: 100,
@@ -211,25 +213,27 @@ export default function NGODashboard() {
   };
 
   const handleEditCampaign = (id) => {
-  const campaign = campaigns.find(c => c.id === id);
-  navigate(`/edit-campaign/${id}`, { state: { campaign } });
-};
+    const campaign = campaigns.find(c => c.id === id);
+    navigate(`/edit-campaign/${id}`, { state: { campaign } });
+  };
 
+  const handleViewCampaign = (id) => {
+    navigate(`/donate/${id}`);
+  };
 
   const handleDeleteCampaign = async (id) => {
-  if (!window.confirm("Are you sure you want to delete this campaign?")) return;
+    if (!window.confirm("Are you sure you want to delete this campaign?")) return;
 
-  try {
-    // Simulate API call
-    // await fetch(`/api/campaigns/${id}`, { method: "DELETE" });
+    try {
+      // Simulate API call
+      // await fetch(`/api/campaigns/${id}`, { method: "DELETE" });
 
-    setCampaigns(prev => prev.filter(c => c.id !== id));
-  } catch (error) {
-    console.error("Failed to delete campaign", error);
-    alert("Failed to delete campaign. Please try again.");
-  }
-};
-
+      setCampaigns(prev => prev.filter(c => c.id !== id));
+    } catch (error) {
+      console.error("Failed to delete campaign", error);
+      alert("Failed to delete campaign. Please try again.");
+    }
+  };
 
   const getDonationTypeIcon = (type) => {
     switch(type) {
@@ -242,29 +246,27 @@ export default function NGODashboard() {
   };
 
   const exportReports = () => {
-  // Prepare CSV content
-  let csv = "Campaign Title,Description,Raised,Goal,Donors,Status,Type\n";
-  campaigns.forEach(c => {
-    csv += `"${c.title}","${c.description}",${c.raised},${c.goal},${c.donors},${c.status},${c.type}\n`;
-  });
+    // Prepare CSV content
+    let csv = "Campaign Title,Description,Raised,Goal,Donors,Status,Type\n";
+    campaigns.forEach(c => {
+      csv += `"${c.title}","${c.description}",${c.raised},${c.goal},${c.donors},${c.status},${c.type}\n`;
+    });
 
-  csv += "\nDonations:\n";
-  csv += "Donor,Type,Amount/Items,Date,Campaign\n";
-  donations.forEach(d => {
-    csv += `"${d.donor}",${d.type},"${d.amount || d.items}",${d.date},"${d.campaign}"\n`;
-  });
+    csv += "\nDonations:\n";
+    csv += "Donor,Type,Amount/Items,Date,Campaign\n";
+    donations.forEach(d => {
+      csv += `"${d.donor}",${d.type},"${d.amount || d.items}",${d.date},"${d.campaign}"\n`;
+    });
 
-  // Convert to Blob and trigger download
-  const blob = new Blob([csv], { type: "text/csv" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = "ngo_reports.csv";
-  link.click();
-  URL.revokeObjectURL(url);
-};
-
-
+    // Convert to Blob and trigger download
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "ngo_reports.csv";
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   const renderAnalyticsView = () => {
     return (
@@ -499,14 +501,23 @@ export default function NGODashboard() {
                           </div>
                           <div className="flex space-x-2">
                             <button
+                              onClick={() => handleViewCampaign(campaign.id)}
+                              className="text-green-500 hover:text-green-700"
+                              title="View Campaign"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </button>
+                            <button
                               onClick={() => handleEditCampaign(campaign.id)}
                               className="text-blue-500 hover:text-blue-700"
+                              title="Edit Campaign"
                             >
                               <Edit className="h-4 w-4" />
                             </button>
                             <button
                               onClick={() => handleDeleteCampaign(campaign.id)}
                               className="text-red-500 hover:text-red-700"
+                              title="Delete Campaign"
                             >
                               <Trash2 className="h-4 w-4" />
                             </button>
