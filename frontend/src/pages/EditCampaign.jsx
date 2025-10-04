@@ -158,7 +158,7 @@ export default function EditCampaign() {
             <h2 className="text-2xl font-bold text-gray-800 mb-2">Campaign Not Found</h2>
             <p className="text-gray-600 mb-4">The campaign you're looking for doesn't exist.</p>
             <button
-              onClick={() => navigate("/ngo/dashboard")}
+              onClick={() => navigate("/ngo-dashboard")}
               className="bg-rose-500 text-white px-6 py-2 rounded-lg hover:bg-rose-600 transition"
             >
               Back to Dashboard
