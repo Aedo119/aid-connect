@@ -10,6 +10,7 @@ export default function CreateCampaign() {
   const { currentUser } = useAuth();
 
   const [formData, setFormData] = useState({ 
+    imageFile: null,
     title: "", 
     description: "", 
     goal_amount: "", 
@@ -192,7 +193,7 @@ export default function CreateCampaign() {
           {/* Header */}
           <div className="mb-8">
             <button
-              onClick={() => navigate("/ngo/dashboard")}
+              onClick={() => navigate("/ngo-dashboard")}
               className="flex items-center text-gray-700 hover:text-rose-500 transition mb-4"
             >
               <ArrowLeft className="h-5 w-5 mr-2" />

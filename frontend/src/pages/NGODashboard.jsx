@@ -65,6 +65,19 @@ const mockCampaigns = [
     donationTypes: ["money", "clothes"],
     createdDate: "2025-07-20",
     endDate: "2025-08-28"
+  },
+  {    id: 4,
+    title: "Healthcare Access for Rural Communities",
+    description: "Setting up mobile clinics to provide essential healthcare services.", 
+    progress: 100,
+    raised: 60000,
+    goal: 60000,
+    donors: 300,
+    status: "Completed",
+    type: "Health",
+    donationTypes: ["money", "medical-supplies"],
+    createdDate: "2025-06-10",
+    endDate: "2025-07-30"
   }
 ];
 
@@ -112,7 +125,7 @@ export default function NGODashboard() {
           const activeCampaigns = mockCampaigns.filter(c => c.status === "Active").length;
           const totalRaised = mockCampaigns.reduce((sum, campaign) => sum + campaign.raised, 0);
           const totalDonors = mockCampaigns.reduce((sum, campaign) => sum + campaign.donors, 0);
-          const completedCampaigns = mockCampaigns.filter(c => c.status === "Completed");
+          const completedCampaigns = mockCampaigns.filter(c => c.status === "Completed") ;
           const successRate = completedCampaigns.length > 0 
             ? Math.round((completedCampaigns.filter(c => c.raised >= c.goal).length / completedCampaigns.length) * 100)
             : 0;
