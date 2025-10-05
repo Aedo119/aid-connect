@@ -17,8 +17,10 @@ export default function Navbar() {
 
   // Items for actual routes
   const pageLinks = [
+    { name: "Campaigns", path: "/campaigns" },
     { name: "Donor Login", path: "/donor-login" },
     { name: "NGO Login", path: "/ngo-login" },
+    
   ];
 
   const handleLogout = async () => {

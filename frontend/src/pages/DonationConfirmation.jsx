@@ -15,7 +15,9 @@ import {
   Building,
   QrCode,
   Info,
-  AlertCircle
+  AlertCircle,
+  Download,
+  Receipt
 } from 'lucide-react';
 
 const donationTypeInfo = {
@@ -85,6 +87,7 @@ export default function DonationConfirmation() {
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [selectedMedicalItems, setSelectedMedicalItems] = useState([]);
   const [selectedClothingTypes, setSelectedClothingTypes] = useState([]);
+  const [donationReference, setDonationReference] = useState('');
   const [formData, setFormData] = useState({
     amount: '',
     customAmount: '',
@@ -137,8 +140,235 @@ export default function DonationConfirmation() {
     }
   };
 
-  const nextStep = () => setStep(step + 1);
+  const nextStep = () => {
+    if (step === 2) {
+      // Generate reference ID when confirming donation
+      const refId = Math.random().toString(36).substring(2, 10).toUpperCase();
+      setDonationReference(refId);
+    }
+    setStep(step + 1);
+  };
+  
   const prevStep = () => setStep(step - 1);
+
+  // Generate receipt content
+  const generateReceiptContent = () => {
+    const donationDate = new Date().toLocaleDateString();
+    const donationTime = new Date().toLocaleTimeString();
+    
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Donation Receipt - ${donationReference}</title>
+        <style>
+          body { 
+            font-family: Arial, sans-serif; 
+            margin: 40px; 
+            color: #333;
+            line-height: 1.6;
+          }
+          .header { 
+            text-align: center; 
+            border-bottom: 2px solid #e11d48; 
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+          }
+          .logo { 
+            font-size: 24px; 
+            font-weight: bold; 
+            color: #e11d48; 
+            margin-bottom: 10px;
+          }
+          .receipt-title { 
+            font-size: 28px; 
+            margin: 10px 0; 
+            color: #1f2937;
+          }
+          .reference { 
+            font-size: 16px; 
+            color: #6b7280; 
+            margin-bottom: 20px;
+          }
+          .section { 
+            margin: 25px 0; 
+          }
+          .section-title { 
+            font-size: 18px; 
+            font-weight: bold; 
+            color: #e11d48; 
+            margin-bottom: 10px;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 5px;
+          }
+          .info-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 15px; 
+          }
+          .info-item { 
+            margin: 8px 0; 
+          }
+          .label { 
+            font-weight: bold; 
+            color: #4b5563; 
+          }
+          .value { 
+            color: #1f2937; 
+          }
+          .footer { 
+            margin-top: 40px; 
+            text-align: center; 
+            color: #6b7280; 
+            font-size: 14px;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 20px;
+          }
+          .thank-you {
+            text-align: center;
+            font-size: 18px;
+            color: #059669;
+            margin: 30px 0;
+            font-weight: bold;
+          }
+          .campaign-info {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div class="logo">HopeBridge</div>
+          <h1 class="receipt-title">DONATION RECEIPT</h1>
+          <div class="reference">Reference ID: ${donationReference}</div>
+          <div>Date: ${donationDate} | Time: ${donationTime}</div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Campaign Information</div>
+          <div class="campaign-info">
+            <div><span class="label">Campaign:</span> <span class="value">${campaign.title}</span></div>
+            <div><span class="label">Organization:</span> <span class="value">HopeBridge Foundation</span></div>
+            <div><span class="label">Description:</span> <span class="value">${campaign.description}</span></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Donation Details</div>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="label">Donation Type:</span><br>
+              <span class="value">${donationInfo.title}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Date:</span><br>
+              <span class="value">${donationDate}</span>
+            </div>
+            ${donationType === 'money' ? `
+            <div class="info-item">
+              <span class="label">Amount:</span><br>
+              <span class="value">$${formData.amount === 'custom' ? formData.customAmount : formData.amount}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Payment Method:</span><br>
+              <span class="value">${formData.paymentMethod === 'card' ? 'Credit/Debit Card' : 
+                formData.paymentMethod === 'upi' ? 'UPI' : 
+                formData.paymentMethod === 'netbanking' ? 'Net Banking' : 
+                'Wallet'}</span>
+            </div>
+            ` : ''}
+            ${donationType === 'food' ? `
+            ${formData.foodItems ? `<div class="info-item">
+              <span class="label">Food Items:</span><br>
+              <span class="value">${formData.foodItems}</span>
+            </div>` : ''}
+            ${formData.foodQuantity ? `<div class="info-item">
+              <span class="label">Quantity:</span><br>
+              <span class="value">${formData.foodQuantity}</span>
+            </div>` : ''}
+            ${formData.dropoffLocation ? `<div class="info-item">
+              <span class="label">Drop-off Location:</span><br>
+              <span class="value">${formData.dropoffLocation === 'central-warehouse' ? 'Central Warehouse' : 
+                formData.dropoffLocation === 'north-distribution' ? 'North Distribution Center' : 
+                formData.dropoffLocation === 'south-community' ? 'South Community Center' : 
+                'East Shelter'}</span>
+            </div>` : ''}
+            ` : ''}
+            ${donationType === 'clothes' ? `
+            ${selectedClothingTypes.length > 0 ? `<div class="info-item">
+              <span class="label">Clothing Types:</span><br>
+              <span class="value">${selectedClothingTypes.join(', ')}</span>
+            </div>` : ''}
+            ${formData.clothingCondition ? `<div class="info-item">
+              <span class="label">Condition:</span><br>
+              <span class="value">${formData.clothingCondition}</span>
+            </div>` : ''}
+            ` : ''}
+            ${donationType === 'medical supplies' ? `
+            ${selectedMedicalItems.length > 0 ? `<div class="info-item">
+              <span class="label">Medical Items:</span><br>
+              <span class="value">${selectedMedicalItems.join(', ')}</span>
+            </div>` : ''}
+            ${formData.expiryDate ? `<div class="info-item">
+              <span class="label">Earliest Expiry:</span><br>
+              <span class="value">${formData.expiryDate}</span>
+            </div>` : ''}
+            <div class="info-item">
+              <span class="label">Pickup Requested:</span><br>
+              <span class="value">${formData.pickupRequested ? 'Yes' : 'No'}</span>
+            </div>
+            ` : ''}
+          </div>
+          ${formData.specialInstructions ? `
+          <div class="info-item" style="margin-top: 15px;">
+            <span class="label">Special Instructions:</span><br>
+            <span class="value">${formData.specialInstructions}</span>
+          </div>
+          ` : ''}
+        </div>
+
+        <div class="thank-you">
+          Thank you for your generous donation!
+        </div>
+
+        <div class="footer">
+          <p>HopeBridge Foundation</p>
+          <p>123 Charity Street, Compassion City</p>
+          <p>Email: contact@hopebridge.org | Phone: (555) 123-HELP</p>
+          <p>This receipt is generated electronically and does not require a signature.</p>
+        </div>
+      </body>
+      </html>
+    `;
+  };
+
+  // Download receipt as PDF
+  const downloadReceipt = () => {
+    const receiptContent = generateReceiptContent();
+    const blob = new Blob([receiptContent], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `donation-receipt-${donationReference}.html`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  // Print receipt
+  const printReceipt = () => {
+    const receiptContent = generateReceiptContent();
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(receiptContent);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+  };
 
   const renderPaymentMethodFields = () => {
     switch(formData.paymentMethod) {
@@ -879,7 +1109,7 @@ export default function DonationConfirmation() {
                 <p><strong>Campaign:</strong> {campaign.title}</p>
                 <p><strong>Donation Type:</strong> {donationInfo.title}</p>
                 <p><strong>Date:</strong> {new Date().toLocaleDateString()}</p>
-                <p><strong>Reference ID:</strong> {Math.random().toString(36).substring(2, 10).toUpperCase()}</p>
+                <p><strong>Reference ID:</strong> {donationReference}</p>
                 
                 {/* Show details based on donation type */}
                 {donationType === 'money' && (
@@ -898,6 +1128,33 @@ export default function DonationConfirmation() {
                 {donationType === 'medical supplies' && formData.pickupRequested && (
                   <p><strong>Pickup Service:</strong> Requested</p>
                 )}
+              </div>
+            </div>
+
+            {/* Receipt Actions */}
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <Receipt className="h-6 w-6 text-rose-500" />
+                <h3 className="text-lg font-semibold text-gray-800">Download Your Receipt</h3>
+              </div>
+              <p className="text-gray-600 mb-4">
+                Keep this receipt for your records. It may be useful for tax purposes or tracking your donations.
+              </p>
+              <div className="flex gap-3 justify-center">
+                <button
+                  onClick={downloadReceipt}
+                  className="flex items-center gap-2 bg-rose-500 text-white px-6 py-3 rounded-lg hover:bg-rose-600 transition"
+                >
+                  <Download className="h-4 w-4" />
+                  Download Receipt
+                </button>
+                <button
+                  onClick={printReceipt}
+                  className="flex items-center gap-2 border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 transition"
+                >
+                  <Receipt className="h-4 w-4" />
+                  Print Receipt
+                </button>
               </div>
             </div>
 

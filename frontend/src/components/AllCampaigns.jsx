@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { campaigns } from "../data/campaigns";
 import ProgressBar from "./ProgressBar";
-import { DollarSign, Package, Shirt, Cross, Heart } from "lucide-react";
+import { DollarSign, Package, Shirt, Cross, Heart, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 
 function StatIcon({ type }) {
@@ -32,11 +32,8 @@ function DonationIcon({ type }) {
   return iconMap[type.toLowerCase()] || <Heart className="h-4 w-4 text-rose-600" />;
 }
 
-export default function FeaturedCampaigns() {
+export default function AllCampaigns() {
   const [selectedDonationTypes, setSelectedDonationTypes] = useState({});
-
-  // Show only first 3 campaigns as featured
-  const featuredCampaigns = campaigns.slice(0, 3);
 
   const handleDonationTypeClick = (campaignId, donationType) => {
     setSelectedDonationTypes(prev => ({
@@ -46,24 +43,33 @@ export default function FeaturedCampaigns() {
   };
 
   return (
-    <section className="py-12 md:py-14">
+    <div className="min-h-screen bg-gray-50 py-8">
       <div className="mx-auto max-w-7xl px-4">
-        <h2 className="text-center text-3xl font-extrabold md:text-[32px]">
-          Featured Campaigns
-        </h2>
-        <p className="mx-auto mt-2 max-w-2xl text-center text-gray-600">
-          Support these high‑impact campaigns and see your donations make a real difference
-        </p>
+        {/* Header */}
+        <div className="mb-8">
+          <Link 
+            to="/"
+            className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Home
+          </Link>
+          <h1 className="text-3xl font-bold text-gray-900">All Campaigns</h1>
+          <p className="mt-2 text-gray-600">
+            Browse all available campaigns and support the causes that matter to you
+          </p>
+        </div>
 
-        <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {featuredCampaigns.map((c) => {
+        {/* Campaigns Grid */}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {campaigns.map((c) => {
             const pct = (c.raised / c.goal) * 100;
             const selectedType = selectedDonationTypes[c.id] || c.donationTypes[0].toLowerCase();
             
             return (
               <article
                 key={c.id}
-                className={`flex flex-col overflow-hidden rounded-lg shadow-md transition-all hover:shadow-lg ${
+                className={`flex flex-col overflow-hidden rounded-lg shadow-md transition-all hover:shadow-lg bg-white ${
                   c.labelLeft === "Emergency" 
                     ? "border-l-4 border-l-red-500" 
                     : "border-l border-l-gray-200"
@@ -153,16 +159,7 @@ export default function FeaturedCampaigns() {
             );
           })}
         </div>
-
-        <div className="mt-8 flex justify-center">
-          <Link
-            to="/campaigns"
-            className="px-5 py-2 border border-gray-300 bg-white rounded-lg hover:bg-gray-100 transition-colors"
-          >
-            View All Campaigns
-          </Link>
-        </div>
       </div>
-    </section>
+    </div>
   );
 }
