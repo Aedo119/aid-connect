@@ -16,7 +16,9 @@ import {
   ChevronRight,
   Award,
   Calendar,
-  MapPin
+  MapPin,
+  Eye,
+  Receipt
 } from 'lucide-react';
 
 // Mock data
@@ -100,7 +102,9 @@ const donationHistory = [
     date: "1/15/2025",
     type: "Money",
     amount: 150,
-    status: "Completed"
+    status: "Completed",
+    reference: "CW20250115JS",
+    campaignId: 5
   },
   {
     id: 2,
@@ -109,7 +113,9 @@ const donationHistory = [
     date: "12/28/2024",
     type: "Clothes",
     amount: 75,
-    status: "Completed"
+    status: "Completed",
+    reference: "WC20241228JS",
+    campaignId: 6
   },
   {
     id: 3,
@@ -118,7 +124,9 @@ const donationHistory = [
     date: "12/10/2024",
     type: "Money",
     amount: 200,
-    status: "Completed"
+    status: "Completed",
+    reference: "MS20241210JS",
+    campaignId: 7
   },
   {
     id: 4,
@@ -127,7 +135,9 @@ const donationHistory = [
     date: "11/22/2024",
     type: "Food",
     amount: 100,
-    status: "Completed"
+    status: "Completed",
+    reference: "FB20241122JS",
+    campaignId: 8
   }
 ];
 
@@ -145,6 +155,7 @@ export default function DonorDashboard() {
   const [activeTab, setActiveTab] = useState("personalized");
   const [selectedDonationTypes, setSelectedDonationTypes] = useState({});
   const [showEmergencyOnly, setShowEmergencyOnly] = useState(false);
+  const [selectedReceipt, setSelectedReceipt] = useState(null);
 
   const handleDonationTypeClick = (campaignId, donationType) => {
     setSelectedDonationTypes(prev => ({
@@ -159,6 +170,392 @@ export default function DonorDashboard() {
 
   const handleShowAllCampaigns = () => {
     setShowEmergencyOnly(false);
+  };
+
+  // Generate receipt content for a donation
+  const generateReceiptContent = (donation) => {
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Donation Receipt - ${donation.reference}</title>
+        <style>
+          body { 
+            font-family: Arial, sans-serif; 
+            margin: 40px; 
+            color: #333;
+            line-height: 1.6;
+          }
+          .header { 
+            text-align: center; 
+            border-bottom: 2px solid #e11d48; 
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+          }
+          .logo { 
+            font-size: 24px; 
+            font-weight: bold; 
+            color: #e11d48; 
+            margin-bottom: 10px;
+          }
+          .receipt-title { 
+            font-size: 28px; 
+            margin: 10px 0; 
+            color: #1f2937;
+          }
+          .reference { 
+            font-size: 16px; 
+            color: #6b7280; 
+            margin-bottom: 20px;
+          }
+          .section { 
+            margin: 25px 0; 
+          }
+          .section-title { 
+            font-size: 18px; 
+            font-weight: bold; 
+            color: #e11d48; 
+            margin-bottom: 10px;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 5px;
+          }
+          .info-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 15px; 
+          }
+          .info-item { 
+            margin: 8px 0; 
+          }
+          .label { 
+            font-weight: bold; 
+            color: #4b5563; 
+          }
+          .value { 
+            color: #1f2937; 
+          }
+          .footer { 
+            margin-top: 40px; 
+            text-align: center; 
+            color: #6b7280; 
+            font-size: 14px;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 20px;
+          }
+          .thank-you {
+            text-align: center;
+            font-size: 18px;
+            color: #059669;
+            margin: 30px 0;
+            font-weight: bold;
+          }
+          .donation-details {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+          }
+          .amount {
+            font-size: 24px;
+            font-weight: bold;
+            color: #e11d48;
+            text-align: center;
+            margin: 20px 0;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div class="logo">HopeBridge</div>
+          <h1 class="receipt-title">DONATION RECEIPT</h1>
+          <div class="reference">Reference ID: ${donation.reference}</div>
+          <div>Date: ${donation.date} | Time: 14:30 PM</div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Donor Information</div>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="label">Name:</span><br>
+              <span class="value">${userData.name}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Email:</span><br>
+              <span class="value">${userData.email}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Donation Details</div>
+          <div class="donation-details">
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="label">Campaign:</span><br>
+                <span class="value">${donation.title}</span>
+              </div>
+              <div class="info-item">
+                <span class="label">Date:</span><br>
+                <span class="value">${donation.date}</span>
+              </div>
+              <div class="info-item">
+                <span class="label">Donation Type:</span><br>
+                <span class="value">${donation.type}</span>
+              </div>
+              <div class="info-item">
+                <span class="label">Status:</span><br>
+                <span class="value">${donation.status}</span>
+              </div>
+            </div>
+            <div class="amount">$${donation.amount}</div>
+            <div class="info-item">
+              <span class="label">Description:</span><br>
+              <span class="value">${donation.description}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="thank-you">
+          Thank you for your generous donation!
+        </div>
+
+        <div class="footer">
+          <p>HopeBridge Foundation</p>
+          <p>123 Charity Street, Compassion City</p>
+          <p>Email: contact@hopebridge.org | Phone: (555) 123-HELP</p>
+          <p>This receipt is generated electronically and does not require a signature.</p>
+        </div>
+      </body>
+      </html>
+    `;
+  };
+
+  // Download individual receipt
+  const downloadReceipt = (donation) => {
+    const receiptContent = generateReceiptContent(donation);
+    const blob = new Blob([receiptContent], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `donation-receipt-${donation.reference}.html`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  // View receipt in modal
+  const viewReceipt = (donation) => {
+    setSelectedReceipt(donation);
+  };
+
+  // Close receipt modal
+  const closeReceipt = () => {
+    setSelectedReceipt(null);
+  };
+
+  // Print receipt
+  const printReceipt = (donation) => {
+    const receiptContent = generateReceiptContent(donation);
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(receiptContent);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+  };
+
+  // Generate and download full donation report
+  const downloadDonationReport = () => {
+    const reportContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Donation Report - ${userData.name}</title>
+        <style>
+          body { 
+            font-family: Arial, sans-serif; 
+            margin: 40px; 
+            color: #333;
+            line-height: 1.6;
+          }
+          .header { 
+            text-align: center; 
+            border-bottom: 2px solid #e11d48; 
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+          }
+          .logo { 
+            font-size: 24px; 
+            font-weight: bold; 
+            color: #e11d48; 
+            margin-bottom: 10px;
+          }
+          .report-title { 
+            font-size: 28px; 
+            margin: 10px 0; 
+            color: #1f2937;
+          }
+          .summary { 
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+          }
+          .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            text-align: center;
+          }
+          .summary-item {
+            padding: 15px;
+          }
+          .summary-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #e11d48;
+            margin-bottom: 5px;
+          }
+          .summary-label {
+            font-size: 14px;
+            color: #6b7280;
+          }
+          .section { 
+            margin: 25px 0; 
+          }
+          .section-title { 
+            font-size: 18px; 
+            font-weight: bold; 
+            color: #e11d48; 
+            margin-bottom: 10px;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 5px;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+          }
+          th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+          }
+          th {
+            background: #f8fafc;
+            font-weight: bold;
+            color: #374151;
+          }
+          .footer { 
+            margin-top: 40px; 
+            text-align: center; 
+            color: #6b7280; 
+            font-size: 14px;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 20px;
+          }
+          .total-row {
+            font-weight: bold;
+            background: #f0f9ff;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div class="logo">HopeBridge</div>
+          <h1 class="report-title">DONATION REPORT</h1>
+          <div>Generated on: ${new Date().toLocaleDateString()}</div>
+          <div>Donor: ${userData.name} (${userData.email})</div>
+        </div>
+
+        <div class="summary">
+          <div class="summary-grid">
+            <div class="summary-item">
+              <div class="summary-value">$${userData.totalDonated}</div>
+              <div class="summary-label">Total Donated</div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-value">${userData.campaignsSupported}</div>
+              <div class="summary-label">Campaigns Supported</div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-value">${userData.impactScore}%</div>
+              <div class="summary-label">Impact Score</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Donation History</div>
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Campaign</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Reference</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${donationHistory.map(donation => `
+                <tr>
+                  <td>${donation.date}</td>
+                  <td>${donation.title}</td>
+                  <td>${donation.type}</td>
+                  <td>$${donation.amount}</td>
+                  <td>${donation.status}</td>
+                  <td>${donation.reference}</td>
+                </tr>
+              `).join('')}
+              <tr class="total-row">
+                <td colspan="3"><strong>Total</strong></td>
+                <td><strong>$${userData.totalDonated}</strong></td>
+                <td colspan="2"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Donation Preferences</div>
+          <table>
+            <tr>
+              <td><strong>Preferred Causes:</strong></td>
+              <td>${userData.preferredCauses.join(', ')}</td>
+            </tr>
+            <tr>
+              <td><strong>Donation Range:</strong></td>
+              <td>${userData.donationRange}</td>
+            </tr>
+            <tr>
+              <td><strong>Donation Types:</strong></td>
+              <td>${userData.donationTypes.join(', ')}</td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="footer">
+          <p>HopeBridge Foundation</p>
+          <p>123 Charity Street, Compassion City</p>
+          <p>Email: contact@hopebridge.org | Phone: (555) 123-HELP</p>
+          <p>This report is generated electronically for your records.</p>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const blob = new Blob([reportContent], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `donation-report-${userData.name.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.html`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   // Filter campaigns based on emergency filter
@@ -343,12 +740,14 @@ export default function DonorDashboard() {
     </div>
   );
 
-
   const renderDonationHistory = () => (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold text-gray-800">Your Donation History</h3>
-        <button className="flex items-center gap-2 text-rose-600 hover:text-rose-700 transition-colors">
+        <button 
+          onClick={downloadDonationReport}
+          className="flex items-center gap-2 text-rose-600 hover:text-rose-700 transition-colors"
+        >
           <Download className="h-4 w-4" />
           <span className="text-sm font-medium">Download Report</span>
         </button>
@@ -373,10 +772,27 @@ export default function DonorDashboard() {
                   <span className="bg-green-100 text-green-700 px-2 py-1 rounded-full">
                     {donation.status}
                   </span>
+                  <span className="text-gray-400">Ref: {donation.reference}</span>
                 </div>
               </div>
               <div className="text-right">
                 <p className="text-lg font-bold text-rose-600">${donation.amount}</p>
+                <div className="flex gap-2 mt-2">
+                  <button
+                    onClick={() => viewReceipt(donation)}
+                    className="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm"
+                  >
+                    <Eye className="h-3 w-3" />
+                    View
+                  </button>
+                  <button
+                    onClick={() => downloadReceipt(donation)}
+                    className="flex items-center gap-1 text-green-600 hover:text-green-700 text-sm"
+                  >
+                    <Download className="h-3 w-3" />
+                    Download
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -479,6 +895,45 @@ export default function DonorDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Receipt Modal */}
+      {selectedReceipt && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Donation Receipt</h3>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => printReceipt(selectedReceipt)}
+                    className="flex items-center gap-1 text-blue-600 hover:text-blue-700"
+                  >
+                    <Receipt className="h-4 w-4" />
+                    Print
+                  </button>
+                  <button
+                    onClick={() => downloadReceipt(selectedReceipt)}
+                    className="flex items-center gap-1 text-green-600 hover:text-green-700"
+                  >
+                    <Download className="h-4 w-4" />
+                    Download
+                  </button>
+                  <button
+                    onClick={closeReceipt}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+              <div 
+                className="receipt-content border rounded-lg p-4"
+                dangerouslySetInnerHTML={{ __html: generateReceiptContent(selectedReceipt) }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
