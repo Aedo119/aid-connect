@@ -43,7 +43,7 @@ export const createDonor = async (userData) => {
     phoneNumber,
     address,
     postalCode,
-    "Organization",
+    "donor",
   ];
 
   try {
@@ -75,9 +75,9 @@ export const getProfileDetails = async (email) => {
       id: donor.user_id,
       name: decrypt(donor.first_name),
       email: email,
-      phoneNumber: decrypt(org.phone_number),
-      address: decrypt(org.address),
-      postalCode: decrypt(org.postal_code),
+      phoneNumber: decrypt(donor.phone_number),
+      address: decrypt(donor.address),
+      postalCode: decrypt(donor.postal_code),
     };
 
     return decryptedDonor;
