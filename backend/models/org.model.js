@@ -1,5 +1,8 @@
 // models/userModel.js
 import { pool } from "../server.js";
+import crypto from "crypto";
+
+const IV_LENGTH = 16;
 
 export const createOrg = async (userData) => {
   const {
@@ -38,20 +41,49 @@ export const createOrg = async (userData) => {
   }
 };
 
+function decrypt(encryptedText) {
+  if (!encryptedText) return null;
+  const ENCRYPTION_KEY = Buffer.from(process.env.ENCRYPTION_KEY, "hex");
+  const textParts = encryptedText.split(":");
+  const iv = Buffer.from(textParts.shift(), "hex");
+  const encryptedData = textParts.join(":");
+  const decipher = crypto.createDecipheriv("aes-256-cbc", ENCRYPTION_KEY, iv);
+  let decrypted = decipher.update(encryptedData, "hex", "utf8");
+  decrypted += decipher.final("utf8");
+  return decrypted;
+}
+
 export const getProfileDetails = async (email) => {
-  const query = `
-    SELECT *
-    FROM Organizations
-    WHERE email = ?
-    LIMIT 1
-  `;
   try {
-    const [rows] = await pool.query(query, [email]);
-    if (rows.length === 0) {
-      return null;
-    }
-    return rows[0];
+    // Get all organizations
+    const [rows] = await pool.query("SELECT * FROM Organizations");
+
+    // Decrypt each email and find matching record
+    const org = rows.find((row) => {
+      try {
+        return decrypt(row.email) === email;
+      } catch {
+        return false;
+      }
+    });
+
+    if (!org) return null;
+
+    // Decrypt other fields if needed
+    const decryptedOrg = {
+      id: org.organization_id,
+      name: decrypt(org.name),
+      description: decrypt(org.description),
+      websiteUrl: decrypt(org.website_url),
+      email: email,
+      phoneNumber: decrypt(org.phone_number),
+      address: decrypt(org.address_line1),
+      postalCode: decrypt(org.postal_code),
+    };
+
+    return decryptedOrg;
   } catch (error) {
+    console.error("Error fetching profile details:", error);
     throw error;
   }
 };

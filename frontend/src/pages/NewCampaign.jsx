@@ -1,35 +1,49 @@
 // src/pages/CreateCampaign.jsx
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { ArrowLeft, Save, Image, DollarSign, Calendar, MapPin, Users, Upload, Plus, AlertTriangle, Check } from "lucide-react";
+import {
+  ArrowLeft,
+  Save,
+  Image,
+  DollarSign,
+  Calendar,
+  MapPin,
+  Users,
+  Upload,
+  Plus,
+  AlertTriangle,
+  Check,
+} from "lucide-react";
 import Footer from "../components/Footer";
 import { useAuth } from "../contexts/AuthContext";
+import api from "../API/api";
 
 export default function CreateCampaign() {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
+  const {user}=useAuth();
 
-  const [formData, setFormData] = useState({ 
+  const [formData, setFormData] = useState({
     imageFile: null,
-    title: "", 
-    description: "", 
-    goal_amount: "", 
-    start_date: "", 
-    end_date: "", 
-    status: "active", 
+    title: "",
+    description: "",
+    goal_amount: "",
+    start_date: "",
+    end_date: "",
+    status: "active",
     category: "",
     location: "",
     donationTypes: [],
     is_emergency: false,
     label_right: "",
-    days_left: ""
+    days_left: "",
   });
-  
+
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
   const [imageFile, setImageFile] = useState(null);
-  
+
   const categories = [
     "Emergency Relief",
     "Water & Sanitation",
@@ -41,38 +55,38 @@ export default function CreateCampaign() {
     "Arts & Culture",
     "Disaster Relief",
     "Human Rights",
-    "Poverty Alleviation"
+    "Poverty Alleviation",
   ];
 
   const donationTypeOptions = [
     { value: "money", label: "Financial Donation" },
     { value: "food", label: "Food Donation" },
     { value: "clothes", label: "Clothing Donation" },
-    { value: "medical-supplies", label: "Medical Supplies" }
+    { value: "medical-supplies", label: "Medical Supplies" },
   ];
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
-    if (type === 'checkbox') {
-      setFormData(prev => ({
+
+    if (type === "checkbox") {
+      setFormData((prev) => ({
         ...prev,
-        [name]: checked
+        [name]: checked,
       }));
     } else {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        [name]: value
+        [name]: value,
       }));
     }
   };
 
   const handleDonationTypeChange = (value) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       donationTypes: prev.donationTypes.includes(value)
-        ? prev.donationTypes.filter(type => type !== value)
-        : [...prev.donationTypes, value]
+        ? prev.donationTypes.filter((type) => type !== value)
+        : [...prev.donationTypes, value],
     }));
   };
 
@@ -94,9 +108,9 @@ export default function CreateCampaign() {
       const today = new Date();
       const timeDiff = endDate.getTime() - today.getTime();
       const daysLeft = Math.ceil(timeDiff / (1000 * 3600 * 24));
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        days_left: daysLeft > 0 ? daysLeft.toString() : "0"
+        days_left: daysLeft > 0 ? daysLeft.toString() : "0",
       }));
     }
   };
@@ -153,30 +167,33 @@ export default function CreateCampaign() {
 
     try {
       // Simulate API call - replace with actual API
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+
       // Auto-set label_left based on emergency status
       const label_left = formData.is_emergency ? "Emergency" : "";
-      
+
       // In a real app, you would send this data to your backend
       const campaignData = {
         ...formData,
         label_left,
-        organization_id: currentUser?.organization_id || 1,
+        organization_id: user.id,
         org: currentUser?.name || "Your Organization",
         raised: 0,
         donors: 0,
         progress: 0,
-        createdDate: new Date().toISOString().split('T')[0],
-        image: imagePreview || "https://images.unsplash.com/photo-1551524164-6ca5e3aa9c6a?q=80&w=1200&auto=format&fit=crop"
+        createdDate: new Date().toISOString().split("T")[0],
+        image:
+          imagePreview ||
+          "https://images.unsplash.com/photo-1551524164-6ca5e3aa9c6a?q=80&w=1200&auto=format&fit=crop",
       };
+      const result = await api.post("/campaign/create", campaignData, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
-      console.log("Creating campaign:", campaignData);
-      
       // Show success message
-      alert("Campaign created successfully!");
+      console.log("Campaign created successfully!");
       navigate("/ngo/dashboard");
-      
     } catch (err) {
       setError("Failed to create campaign. Please try again.");
       console.error("Error creating campaign:", err);
@@ -199,8 +216,12 @@ export default function CreateCampaign() {
               <ArrowLeft className="h-5 w-5 mr-2" />
               Back to Dashboard
             </button>
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">Create New Campaign</h1>
-            <p className="text-gray-600">Start a new fundraising campaign to make an impact</p>
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">
+              Create New Campaign
+            </h1>
+            <p className="text-gray-600">
+              Start a new fundraising campaign to make an impact
+            </p>
           </div>
 
           {/* Error Message */}
@@ -276,7 +297,7 @@ export default function CreateCampaign() {
                     required
                   >
                     <option value="">Select a category</option>
-                    {categories.map(category => (
+                    {categories.map((category) => (
                       <option key={category} value={category}>
                         {category}
                       </option>
@@ -318,9 +339,13 @@ export default function CreateCampaign() {
                           onChange={handleInputChange}
                           className="absolute opacity-0 h-0 w-0"
                         />
-                        <div className={`w-5 h-5 flex items-center justify-center rounded-md border-2 transition-all duration-200 ${
-                          formData.is_emergency ? 'bg-rose-500 border-rose-500' : 'bg-white border-gray-300'
-                        }`}>
+                        <div
+                          className={`w-5 h-5 flex items-center justify-center rounded-md border-2 transition-all duration-200 ${
+                            formData.is_emergency
+                              ? "bg-rose-500 border-rose-500"
+                              : "bg-white border-gray-300"
+                          }`}
+                        >
                           {formData.is_emergency && (
                             <Check className="h-4 w-4 text-white stroke-[3]" />
                           )}
@@ -329,8 +354,12 @@ export default function CreateCampaign() {
                       <div className="flex items-center">
                         <AlertTriangle className="h-5 w-5 text-red-500 mr-2" />
                         <div>
-                          <span className="font-medium text-gray-700">Emergency Campaign</span>
-                          <p className="text-sm text-gray-500">Check if this is an urgent relief effort</p>
+                          <span className="font-medium text-gray-700">
+                            Emergency Campaign
+                          </span>
+                          <p className="text-sm text-gray-500">
+                            Check if this is an urgent relief effort
+                          </p>
                         </div>
                       </div>
                     </label>
@@ -398,8 +427,8 @@ export default function CreateCampaign() {
                       key={option.value}
                       className={`flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all ${
                         formData.donationTypes.includes(option.value)
-                          ? 'border-rose-500 bg-rose-50'
-                          : 'border-gray-300 hover:border-rose-300'
+                          ? "border-rose-500 bg-rose-50"
+                          : "border-gray-300 hover:border-rose-300"
                       }`}
                     >
                       <input
@@ -426,9 +455,9 @@ export default function CreateCampaign() {
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                   {imagePreview ? (
                     <div className="space-y-4">
-                      <img 
-                        src={imagePreview} 
-                        alt="Campaign preview" 
+                      <img
+                        src={imagePreview}
+                        alt="Campaign preview"
                         className="mx-auto h-32 w-32 object-cover rounded-lg"
                       />
                       <button
@@ -445,8 +474,12 @@ export default function CreateCampaign() {
                   ) : (
                     <>
                       <Image className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                      <p className="text-gray-600 mb-2">Upload a campaign image</p>
-                      <p className="text-sm text-gray-500 mb-4">PNG, JPG, GIF up to 10MB</p>
+                      <p className="text-gray-600 mb-2">
+                        Upload a campaign image
+                      </p>
+                      <p className="text-sm text-gray-500 mb-4">
+                        PNG, JPG, GIF up to 10MB
+                      </p>
                       <label className="bg-rose-500 text-white px-4 py-2 rounded-lg hover:bg-rose-600 transition cursor-pointer">
                         <Upload className="h-4 w-4 inline mr-1" />
                         Choose File
@@ -477,8 +510,8 @@ export default function CreateCampaign() {
                   disabled={loading}
                   className={`flex-1 py-3 rounded-lg transition flex items-center justify-center ${
                     loading
-                      ? 'bg-gray-400 cursor-not-allowed'
-                      : 'bg-rose-500 hover:bg-rose-600'
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-rose-500 hover:bg-rose-600"
                   } text-white`}
                 >
                   {loading ? (
@@ -499,12 +532,16 @@ export default function CreateCampaign() {
 
           {/* Campaign Preview Section */}
           <div className="mt-8 bg-white/90 backdrop-blur-md rounded-2xl shadow-xl p-8">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">Campaign Preview</h3>
+            <h3 className="text-xl font-bold text-gray-800 mb-4">
+              Campaign Preview
+            </h3>
             <div className="border border-gray-200 rounded-lg p-6">
               {formData.title ? (
                 <>
                   <div className="flex items-start justify-between mb-3">
-                    <h4 className="font-bold text-lg text-gray-800">{formData.title}</h4>
+                    <h4 className="font-bold text-lg text-gray-800">
+                      {formData.title}
+                    </h4>
                     <div className="flex items-center space-x-2">
                       {formData.is_emergency && (
                         <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded flex items-center">
@@ -523,27 +560,41 @@ export default function CreateCampaign() {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
                     <div>
                       <span className="text-gray-500">Goal:</span>
-                      <p className="font-medium">${formData.goal_amount ? Number(formData.goal_amount).toLocaleString() : '0'}</p>
+                      <p className="font-medium">
+                        $
+                        {formData.goal_amount
+                          ? Number(formData.goal_amount).toLocaleString()
+                          : "0"}
+                      </p>
                     </div>
                     <div>
                       <span className="text-gray-500">Category:</span>
-                      <p className="font-medium">{formData.category || 'Not set'}</p>
+                      <p className="font-medium">
+                        {formData.category || "Not set"}
+                      </p>
                     </div>
                     <div>
                       <span className="text-gray-500">Location:</span>
-                      <p className="font-medium">{formData.location || 'Not set'}</p>
+                      <p className="font-medium">
+                        {formData.location || "Not set"}
+                      </p>
                     </div>
                     <div>
                       <span className="text-gray-500">Days Left:</span>
-                      <p className="font-medium">{formData.days_left || 'Not set'}</p>
+                      <p className="font-medium">
+                        {formData.days_left || "Not set"}
+                      </p>
                     </div>
                   </div>
                   {formData.donationTypes.length > 0 && (
                     <div className="flex flex-wrap gap-2">
-                      {formData.donationTypes.map(type => (
-                        <div key={type} className="bg-gray-100 px-3 py-1 rounded-full">
+                      {formData.donationTypes.map((type) => (
+                        <div
+                          key={type}
+                          className="bg-gray-100 px-3 py-1 rounded-full"
+                        >
                           <span className="text-xs text-gray-600 capitalize">
-                            {type.replace('-', ' ')}
+                            {type.replace("-", " ")}
                           </span>
                         </div>
                       ))}
@@ -551,7 +602,9 @@ export default function CreateCampaign() {
                   )}
                 </>
               ) : (
-                <p className="text-gray-500 text-center">Fill out the form to see preview</p>
+                <p className="text-gray-500 text-center">
+                  Fill out the form to see preview
+                </p>
               )}
             </div>
           </div>

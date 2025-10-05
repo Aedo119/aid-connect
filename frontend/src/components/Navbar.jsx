@@ -9,7 +9,7 @@ export default function Navbar() {
 
   // Items for homepage scroll
   const sectionLinks = [
-    { name: "Home", path: "/#hero" },
+    { name: "Home", path: "/" },
     { name: "Campaigns", path: "/#featured-campaigns" },
     { name: "Impact", path: "/#impact-stats" },
     { name: "Testimonials", path: "/#testimonials" },

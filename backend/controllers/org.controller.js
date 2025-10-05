@@ -60,8 +60,7 @@ export const signup = async (req, res) => {
 
 export const getProfile = async (req, res) => {
   // This endpoint is protected by verifyToken middleware
-  const [user] = await getProfileDetails(req.user.email);
-  console.log(user);
+  const user = await getProfileDetails(req.user.email);
   res.json({
     user: user,
     message: "Profile retrieved successfully",

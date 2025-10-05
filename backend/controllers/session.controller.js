@@ -169,6 +169,7 @@ export const refreshToken = async (req, res) => {
 
   // Try to find user in both tables
   let user = null;
+  
   try {
     user = await validateUser({ email: session.email });
   } catch (error) {
@@ -178,10 +179,6 @@ export const refreshToken = async (req, res) => {
     } catch (orgError) {
       return res.status(404).json({ error: "User not found" });
     }
-  }
-
-  if (!user) {
-    return res.status(404).json({ error: "User not found" });
   }
 
   // Rotate refresh token

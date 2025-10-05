@@ -42,3 +42,36 @@ CREATE TABLE IF NOT EXISTS sessions (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+CREATE TABLE Campaigns (
+    campaign_id INT auto_increment primary key,
+    organization_id INT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    fundraising_goal DECIMAL(12,2) NOT NULL,
+    category ENUM('Education', 'Health', 'Environment', 'Community', 'Other') NOT NULL,
+    location VARCHAR(255) NOT NULL,
+    emergency BOOLEAN DEFAULT FALSE,
+    tag VARCHAR(100),
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    image_url VARCHAR(500),
+    status ENUM('Active', 'Completed', 'Cancelled') DEFAULT 'Active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (organization_id) REFERENCES Organizations(organization_id)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE DonationTypes (
+    donation_type_id INT AUTO_INCREMENT PRIMARY KEY,
+    name ENUM('money', 'food', 'clothes', 'medical-supplies') UNIQUE NOT NULL
+);
+
+CREATE TABLE CampaignDonationTypes (
+    campaign_id INT NOT NULL,
+    donation_type_id INT NOT NULL,
+    PRIMARY KEY (campaign_id, donation_type_id),
+    FOREIGN KEY (campaign_id) REFERENCES Campaigns(campaign_id) ON DELETE CASCADE,
+    FOREIGN KEY (donation_type_id) REFERENCES DonationTypes(donation_type_id) ON DELETE CASCADE
+);

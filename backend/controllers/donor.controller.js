@@ -53,11 +53,30 @@ export const signup = async (req, res) => {
 };
 
 export const getProfile = async (req, res) => {
-  // This endpoint is protected by verifyToken middleware
-  const [user] = await getProfileDetails(req.user.email);
-  console.log(user);
-  res.json({
-    user: user,
-    message: "Profile retrieved successfully",
-  });
+  try {
+    // Protected by verifyToken middleware
+    const user = await getProfileDetails(req.user.email);
+
+    if (!user) {
+      return res.status(404).json({ 
+        error: "User not found" 
+      });
+    }
+
+    console.log("inside user controller", user);
+
+    res.status(200).json({
+      user,
+      message: "Profile retrieved successfully",
+    });
+
+  } catch (error) {
+    console.error("Error in getProfile:", error);
+    res.status(500).json({ 
+      error: "Internal server error" 
+    });
+  }
 };
+
+
+

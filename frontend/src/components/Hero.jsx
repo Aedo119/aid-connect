@@ -1,4 +1,14 @@
+import { useEffect } from "react";
+import {useAuth } from "../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+
 export default function Hero() {
+  const navigate=useNavigate();
+  const {user}=useAuth();
+  useEffect(()=>{
+    console.log("User details: ",user);
+  },[user]);
+
   return (
     <section className="relative overflow-hidden">
       {/* Teal 400 → Teal 500 → Rose 100 → Rose 300 gradient */}
@@ -25,10 +35,10 @@ export default function Hero() {
 
           {/* CTA buttons */}
           <div className="mt-8 flex justify-center gap-4">
-            <button className="bg-white text-rose-500 hover:bg-rose-50 px-6 py-3 font-semibold shadow-md rounded-lg transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0">
+            <button className="bg-white text-rose-500 hover:bg-rose-50 px-6 py-3 font-semibold shadow-md rounded-lg transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0" onClick={()=>navigate("/donor-dashboard")}>
               Start Donating
             </button>
-            <button className="bg-white text-rose-500 hover:bg-rose-50 px-6 py-3 font-semibold shadow-md rounded-lg transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0">
+            <button className="bg-white text-rose-500 hover:bg-rose-50 px-6 py-3 font-semibold shadow-md rounded-lg transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0" onClick={()=>navigate("/ngo-dashboard")}>
               Start a Campaign
             </button>
           </div>

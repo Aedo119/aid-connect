@@ -7,6 +7,8 @@ import indexRoute from "./routes/indexRoute.routes.js";
 
 dotenv.config();
 const app = express();
+app.use(express.json());
+app.use(cookieParser()); 
 
 app.use(
   cors({
@@ -14,8 +16,7 @@ app.use(
     credentials: true,
   })
 );
-app.use(express.json());
-app.use(cookieParser());
+
 
 export const pool = mysql.createPool({
   host: process.env.DB_HOST, // e.g. "mysql.railway.app"

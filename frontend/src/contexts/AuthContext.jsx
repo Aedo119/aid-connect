@@ -24,14 +24,16 @@ export const AuthProvider = ({ children }) => {
     try {
       // Try donor profile first
       const donorResponse = await authAPI.getDonorProfile();
+      donorResponse.user.type="donor";
       setUser(donorResponse.user);
-     
+      
     } catch (donorError) {
       try {
         // If donor fails, try org profile
         const orgResponse = await authAPI.getOrgProfile();
+        orgResponse.user.type="org";
         setUser(orgResponse.user);
-    
+       
       } catch (orgError) {
         setUser(null);
       }
@@ -44,6 +46,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await authAPI.userLogin(email, password);
       setUser(response.user);
+      checkAuthStatus();
       return { success: true, message: response.message };
     } catch (error) {
       return {
@@ -57,6 +60,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await authAPI.orgLogin(email, password);
       setUser(response.user);
+      checkAuthStatus();
       return { success: true, message: response.message };
     } catch (error) {
       return {

@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import Footer from "../components/Footer";
-import { 
-  Heart, 
-  DollarSign, 
-  Package, 
-  Shirt, 
+import {
+  Heart,
+  DollarSign,
+  Package,
+  Shirt,
   Cross,
   TrendingUp,
   Clock,
@@ -16,8 +16,11 @@ import {
   ChevronRight,
   Award,
   Calendar,
-  MapPin
-} from 'lucide-react';
+  MapPin,
+} from "lucide-react";
+import { useEffect } from "react";
+import { useAuth } from "../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 // Mock data
 const userData = {
@@ -28,14 +31,15 @@ const userData = {
   impactScore: 87,
   donationRange: "$50 - $200",
   preferredCauses: ["Environment", "Education"],
-  donationTypes: ["Money", "Clothes"]
+  donationTypes: ["Money", "Clothes"],
 };
 
 const campaigns = [
   {
     id: 1,
     title: "Emergency Food Relief for Earthquake Victims",
-    description: "Providing immediate food assistance to families affected by the recent earthquake.",
+    description:
+      "Providing immediate food assistance to families affected by the recent earthquake.",
     organization: "Global Relief Foundation",
     raised: 32000,
     goal: 50000,
@@ -45,12 +49,13 @@ const campaigns = [
     type: "Emergency Relief",
     donationTypes: ["Money", "Food"],
     progress: 64,
-    urgent: true
+    urgent: true,
   },
   {
     id: 2,
     title: "Climate Action: Reforestation Initiative",
-    description: "Planting trees to combat climate change and restore natural habitats.",
+    description:
+      "Planting trees to combat climate change and restore natural habitats.",
     organization: "Green Future Initiative",
     raised: 18800,
     goal: 30000,
@@ -59,12 +64,13 @@ const campaigns = [
     category: "Environment",
     type: "Reforestation",
     donationTypes: ["Money"],
-    progress: 62
+    progress: 62,
   },
   {
     id: 3,
     title: "School Supplies for Remote Learning",
-    description: "Providing laptops and learning materials for students in underserved areas.",
+    description:
+      "Providing laptops and learning materials for students in underserved areas.",
     organization: "Education First",
     raised: 8800,
     goal: 15000,
@@ -73,8 +79,8 @@ const campaigns = [
     category: "Education",
     type: "Educational Support",
     donationTypes: ["Money", "Clothes"],
-    progress: 59
-  }
+    progress: 59,
+  },
 ];
 
 const donationHistory = [
@@ -85,7 +91,7 @@ const donationHistory = [
     date: "1/15/2025",
     type: "Money",
     amount: 150,
-    status: "Completed"
+    status: "Completed",
   },
   {
     id: 2,
@@ -94,7 +100,7 @@ const donationHistory = [
     date: "12/28/2024",
     type: "Clothes",
     amount: 75,
-    status: "Completed"
+    status: "Completed",
   },
   {
     id: 3,
@@ -103,7 +109,7 @@ const donationHistory = [
     date: "12/10/2024",
     type: "Money",
     amount: 200,
-    status: "Completed"
+    status: "Completed",
   },
   {
     id: 4,
@@ -112,8 +118,8 @@ const donationHistory = [
     date: "11/22/2024",
     type: "Food",
     amount: 100,
-    status: "Completed"
-  }
+    status: "Completed",
+  },
 ];
 
 const DonationIcon = ({ type }) => {
@@ -128,12 +134,20 @@ const DonationIcon = ({ type }) => {
 
 export default function DonorDashboard() {
   const [activeTab, setActiveTab] = useState("personalized");
+  const navigate=useNavigate();
   const [selectedDonationTypes, setSelectedDonationTypes] = useState({});
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if(!user || user.type!="donor"){
+      navigate("/donor-login");
+    }
+  },[user]);
 
   const handleDonationTypeClick = (campaignId, donationType) => {
-    setSelectedDonationTypes(prev => ({
+    setSelectedDonationTypes((prev) => ({
       ...prev,
-      [campaignId]: donationType
+      [campaignId]: donationType,
     }));
   };
 
@@ -143,12 +157,15 @@ export default function DonorDashboard() {
       <div className="bg-red-50 border border-red-200 rounded-lg p-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="font-semibold text-red-800">Urgent: Emergency Campaigns Need Support</h3>
+            <h3 className="font-semibold text-red-800">
+              Urgent: Emergency Campaigns Need Support
+            </h3>
             <p className="text-red-600 text-sm mt-1">
-              2 emergency campaigns matching your preferences require immediate assistance.
+              2 emergency campaigns matching your preferences require immediate
+              assistance.
             </p>
           </div>
-          <Link 
+          <Link
             to="/campaigns?filter=emergency"
             className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
           >
@@ -159,13 +176,19 @@ export default function DonorDashboard() {
 
       {/* Recommended Section */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">Recommended for You</h3>
+        <h3 className="text-lg font-semibold text-gray-800 mb-4">
+          Recommended for You
+        </h3>
         <div className="space-y-6">
           {campaigns.map((campaign) => {
-            const selectedType = selectedDonationTypes[campaign.id] || campaign.donationTypes[0];
-            
+            const selectedType =
+              selectedDonationTypes[campaign.id] || campaign.donationTypes[0];
+
             return (
-              <div key={campaign.id} className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+              <div
+                key={campaign.id}
+                className="bg-white rounded-lg shadow-md border border-gray-200 p-6"
+              >
                 {/* Campaign Header */}
                 <div className="flex items-start justify-between mb-4">
                   <div>
@@ -179,10 +202,15 @@ export default function DonorDashboard() {
                         {campaign.type}
                       </span>
                     </div>
-                    <h4 className="text-xl font-semibold text-gray-800">{campaign.title}</h4>
+                    <h4 className="text-xl font-semibold text-gray-800">
+                      {campaign.title}
+                    </h4>
                     <p className="text-gray-600 mt-1">{campaign.description}</p>
                     <p className="text-sm text-gray-500 mt-2">
-                      by <span className="font-medium text-gray-700">{campaign.organization}</span>
+                      by{" "}
+                      <span className="font-medium text-gray-700">
+                        {campaign.organization}
+                      </span>
                     </p>
                   </div>
                 </div>
@@ -191,11 +219,15 @@ export default function DonorDashboard() {
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span className="font-semibold">${campaign.raised.toLocaleString()} raised</span>
-                      <span className="text-gray-600">Goal: ${campaign.goal.toLocaleString()}</span>
+                      <span className="font-semibold">
+                        ${campaign.raised.toLocaleString()} raised
+                      </span>
+                      <span className="text-gray-600">
+                        Goal: ${campaign.goal.toLocaleString()}
+                      </span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
+                      <div
                         className="bg-rose-500 h-2 rounded-full transition-all duration-500"
                         style={{ width: `${campaign.progress}%` }}
                       ></div>
@@ -214,12 +246,16 @@ export default function DonorDashboard() {
 
                   {/* Donation Types */}
                   <div>
-                    <p className="text-sm font-medium text-gray-700 mb-2">Choose donation type:</p>
+                    <p className="text-sm font-medium text-gray-700 mb-2">
+                      Choose donation type:
+                    </p>
                     <div className="flex flex-wrap gap-2">
                       {campaign.donationTypes.map((type) => (
                         <button
                           key={type}
-                          onClick={() => handleDonationTypeClick(campaign.id, type)}
+                          onClick={() =>
+                            handleDonationTypeClick(campaign.id, type)
+                          }
                           className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm transition-colors ${
                             selectedType === type
                               ? "bg-rose-100 text-rose-700 border border-rose-300"
@@ -235,7 +271,9 @@ export default function DonorDashboard() {
 
                   {/* Donate Button */}
                   <Link
-                    to={`/donation-confirmation/${campaign.id}/${selectedType.toLowerCase()}`}
+                    to={`/donation-confirmation/${
+                      campaign.id
+                    }/${selectedType.toLowerCase()}`}
                     className={`block text-center w-full py-3 rounded-lg font-medium transition-colors ${
                       campaign.urgent
                         ? "bg-red-600 text-white hover:bg-red-700"
@@ -256,7 +294,9 @@ export default function DonorDashboard() {
   const renderDonationHistory = () => (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold text-gray-800">Your Donation History</h3>
+        <h3 className="text-lg font-semibold text-gray-800">
+          Your Donation History
+        </h3>
         <button className="flex items-center gap-2 text-rose-600 hover:text-rose-700 transition-colors">
           <Download className="h-4 w-4" />
           <span className="text-sm font-medium">Download Report</span>
@@ -265,11 +305,18 @@ export default function DonorDashboard() {
 
       <div className="space-y-4">
         {donationHistory.map((donation) => (
-          <div key={donation.id} className="bg-white rounded-lg border border-gray-200 p-4">
+          <div
+            key={donation.id}
+            className="bg-white rounded-lg border border-gray-200 p-4"
+          >
             <div className="flex justify-between items-start">
               <div className="flex-1">
-                <h4 className="font-semibold text-gray-800">{donation.title}</h4>
-                <p className="text-gray-600 text-sm mt-1">{donation.description}</p>
+                <h4 className="font-semibold text-gray-800">
+                  {donation.title}
+                </h4>
+                <p className="text-gray-600 text-sm mt-1">
+                  {donation.description}
+                </p>
                 <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
                   <span className="flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
@@ -285,7 +332,9 @@ export default function DonorDashboard() {
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-lg font-bold text-rose-600">${donation.amount}</p>
+                <p className="text-lg font-bold text-rose-600">
+                  ${donation.amount}
+                </p>
               </div>
             </div>
           </div>
@@ -299,7 +348,9 @@ export default function DonorDashboard() {
       {/* Profile Information */}
       <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
         <div className="flex justify-between items-start mb-4">
-          <h3 className="text-lg font-semibold text-gray-800">Profile Information</h3>
+          <h3 className="text-lg font-semibold text-gray-800">
+            Profile Information
+          </h3>
           <button className="flex items-center gap-2 text-rose-600 hover:text-rose-700 transition-colors">
             <Edit3 className="h-4 w-4" />
             <span className="text-sm font-medium">Edit Profile</span>
@@ -318,11 +369,15 @@ export default function DonorDashboard() {
 
       {/* Donation Preferences */}
       <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">Donation Preferences</h3>
-        
+        <h3 className="text-lg font-semibold text-gray-800 mb-4">
+          Donation Preferences
+        </h3>
+
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Preferred Causes</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Preferred Causes
+            </label>
             <div className="flex flex-wrap gap-2">
               {userData.preferredCauses.map((cause, index) => (
                 <span
@@ -339,12 +394,18 @@ export default function DonorDashboard() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Donation Range</label>
-            <p className="text-gray-800 font-medium">{userData.donationRange} per donation</p>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Donation Range
+            </label>
+            <p className="text-gray-800 font-medium">
+              {userData.donationRange} per donation
+            </p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Donation Types</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Donation Types
+            </label>
             <div className="flex flex-wrap gap-2">
               {userData.donationTypes.map((type) => (
                 <span
@@ -371,24 +432,6 @@ export default function DonorDashboard() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br  from-yellow-100 via-teal-500 via-rose-300 to-rose-500">
-      {/* Header */}
-      <div >
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-800">Welcome back, {userData.name}!</h1>
-              <p className="text-gray-600 mt-1">Continue making a difference with your generous support</p>
-            </div>
-            <div className="flex items-center gap-4">
-              <Bell className="h-6 w-6 text-white cursor-pointer hover:text-gray-600" />
-              <div className="w-8 h-8 bg-rose-500 rounded-full flex items-center justify-center text-white font-semibold">
-                {userData.name.charAt(0)}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Sidebar Stats */}
@@ -399,26 +442,38 @@ export default function DonorDashboard() {
                 <div className="text-center">
                   <div className="flex items-center justify-center gap-2 mb-2">
                     <DollarSign className="h-6 w-6 text-rose-500" />
-                    <h3 className="text-lg font-semibold text-gray-800">Total Donated</h3>
+                    <h3 className="text-lg font-semibold text-gray-800">
+                      Total Donated
+                    </h3>
                   </div>
-                  <p className="text-3xl font-bold text-rose-600">${userData.totalDonated}</p>
+                  <p className="text-3xl font-bold text-rose-600">
+                    ${userData.totalDonated}
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="text-center">
                     <div className="flex items-center justify-center gap-1 mb-1">
                       <Award className="h-4 w-4 text-teal-500" />
-                      <h4 className="text-sm font-medium text-gray-700">Campaigns</h4>
+                      <h4 className="text-sm font-medium text-gray-700">
+                        Campaigns
+                      </h4>
                     </div>
-                    <p className="text-xl font-bold text-gray-800">{userData.campaignsSupported}</p>
+                    <p className="text-xl font-bold text-gray-800">
+                      {userData.campaignsSupported}
+                    </p>
                   </div>
 
                   <div className="text-center">
                     <div className="flex items-center justify-center gap-1 mb-1">
                       <TrendingUp className="h-4 w-4 text-green-500" />
-                      <h4 className="text-sm font-medium text-gray-700">Impact Score</h4>
+                      <h4 className="text-sm font-medium text-gray-700">
+                        Impact Score
+                      </h4>
                     </div>
-                    <p className="text-xl font-bold text-gray-800">{userData.impactScore}%</p>
+                    <p className="text-xl font-bold text-gray-800">
+                      {userData.impactScore}%
+                    </p>
                   </div>
                 </div>
               </div>
@@ -428,9 +483,17 @@ export default function DonorDashboard() {
             <div className="bg-white rounded-lg shadow-md border border-gray-200 p-4">
               <nav className="space-y-2">
                 {[
-                  { id: "personalized", label: "Personalized Feed", icon: Heart },
+                  {
+                    id: "personalized",
+                    label: "Personalized Feed",
+                    icon: Heart,
+                  },
                   { id: "history", label: "Donation History", icon: Clock },
-                  { id: "profile", label: "Profile & Preferences", icon: Users },
+                  {
+                    id: "profile",
+                    label: "Profile & Preferences",
+                    icon: Users,
+                  },
                 ].map((tab) => {
                   const Icon = tab.icon;
                   return (
