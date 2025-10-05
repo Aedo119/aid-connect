@@ -65,6 +65,8 @@ CREATE TABLE Campaigns (
         ON DELETE CASCADE
 );
 
+insert into donationTypes values (1,'money'),(2,'food'),(3,'clothes'),(4,'medical-supplies');
+
 CREATE TABLE DonationTypes (
     donation_type_id INT AUTO_INCREMENT PRIMARY KEY,
     name ENUM('money', 'food', 'clothes', 'medical-supplies') UNIQUE NOT NULL
