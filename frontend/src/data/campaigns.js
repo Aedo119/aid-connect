@@ -134,5 +134,42 @@ export const campaigns = [
     ],
     volunteers: 32,
     impact: "Supporting education for 500+ children across 5 schools"
+  },
+  {
+    id: 4,
+    orgId: 104,
+    org: "Disaster Response Team",
+    title: "Hurricane Relief Fund",
+    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1200&auto=format&fit=crop",
+    description: "Emergency aid for communities affected by the recent hurricane.",
+    organization: "Disaster Response Team",
+    raised: 45000,
+    goal: 75000,
+    donors: 89,
+    daysLeft: 5,
+    category: "Emergency",
+    type: "Emergency Relief",
+    donationTypes: ["Money", "Clothes", "Food"],
+    progress: 60,
+    urgent: true
+  },
+  {
+    id: 5,
+    orgId: 103,
+    org: "Education for All",
+    title: "Clean Water for All",
+    image: "https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?q=80&w=1200&auto=format&fit=crop",
+    description: "Building wells and sanitation facilities in underserved areas.",
+    organization: "WaterAid",
+    raised: 30000,
+    goal: 60000,
+    donors: 120,
+    daysLeft: 20,
+    category: "Health",
+    type: "Water & Sanitation",
+    donationTypes: ["Money", "Medical Supplies"],
+    progress: 50,
+    urgent: false
   }
+
 ];

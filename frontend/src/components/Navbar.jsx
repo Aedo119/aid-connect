@@ -10,15 +10,16 @@ export default function Navbar() {
   // Items for homepage scroll
   const sectionLinks = [
     { name: "Home", path: "/#hero" },
-    { name: "Campaigns", path: "/#featured-campaigns" },
     { name: "Impact", path: "/#impact-stats" },
     { name: "Testimonials", path: "/#testimonials" },
   ];
 
   // Items for actual routes
   const pageLinks = [
+    { name: "Campaigns", path: "/campaigns" },
     { name: "Donor Login", path: "/donor-login" },
     { name: "NGO Login", path: "/ngo-login" },
+    
   ];
 
   const handleLogout = async () => {

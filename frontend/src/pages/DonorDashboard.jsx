@@ -74,6 +74,21 @@ const campaigns = [
     type: "Educational Support",
     donationTypes: ["Money", "Clothes"],
     progress: 59
+  },
+  {
+    id: 4,
+    title: "Hurricane Relief Fund",
+    description: "Emergency aid for communities affected by the recent hurricane.",
+    organization: "Disaster Response Team",
+    raised: 45000,
+    goal: 75000,
+    donors: 89,
+    daysLeft: 5,
+    category: "Emergency",
+    type: "Emergency Relief",
+    donationTypes: ["Money", "Clothes", "Food"],
+    progress: 60,
+    urgent: true
   }
 ];
 
@@ -129,6 +144,7 @@ const DonationIcon = ({ type }) => {
 export default function DonorDashboard() {
   const [activeTab, setActiveTab] = useState("personalized");
   const [selectedDonationTypes, setSelectedDonationTypes] = useState({});
+  const [showEmergencyOnly, setShowEmergencyOnly] = useState(false);
 
   const handleDonationTypeClick = (campaignId, donationType) => {
     setSelectedDonationTypes(prev => ({
@@ -136,6 +152,19 @@ export default function DonorDashboard() {
       [campaignId]: donationType
     }));
   };
+
+  const handleViewEmergencyCampaigns = () => {
+    setShowEmergencyOnly(true);
+  };
+
+  const handleShowAllCampaigns = () => {
+    setShowEmergencyOnly(false);
+  };
+
+  // Filter campaigns based on emergency filter
+  const filteredCampaigns = showEmergencyOnly 
+    ? campaigns.filter(campaign => campaign.urgent)
+    : campaigns;
 
   const renderPersonalizedFeed = () => (
     <div className="space-y-6">
@@ -145,113 +174,175 @@ export default function DonorDashboard() {
           <div>
             <h3 className="font-semibold text-red-800">Urgent: Emergency Campaigns Need Support</h3>
             <p className="text-red-600 text-sm mt-1">
-              2 emergency campaigns matching your preferences require immediate assistance.
+              {campaigns.filter(camp => camp.urgent).length} emergency campaigns matching your preferences require immediate assistance.
             </p>
           </div>
-          <Link 
-            to="/campaigns?filter=emergency"
-            className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
-          >
-            View Emergency Campaigns
-          </Link>
+          {showEmergencyOnly ? (
+            <button
+              onClick={handleShowAllCampaigns}
+              className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium"
+            >
+              Show All Campaigns
+            </button>
+          ) : (
+            <button
+              onClick={handleViewEmergencyCampaigns}
+              className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
+            >
+              View Emergency Campaigns
+            </button>
+          )}
         </div>
       </div>
+
+      {/* Filter Status */}
+      {showEmergencyOnly && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-medium">
+                Emergency Filter
+              </span>
+              <p className="text-blue-700 text-sm">
+                Showing {filteredCampaigns.length} emergency campaign(s)
+              </p>
+            </div>
+            <button
+              onClick={handleShowAllCampaigns}
+              className="text-blue-600 hover:text-blue-700 text-sm font-medium underline"
+            >
+              Show all campaigns
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Recommended Section */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">Recommended for You</h3>
-        <div className="space-y-6">
-          {campaigns.map((campaign) => {
-            const selectedType = selectedDonationTypes[campaign.id] || campaign.donationTypes[0];
-            
-            return (
-              <div key={campaign.id} className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
-                {/* Campaign Header */}
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      {campaign.urgent && (
-                        <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-medium">
-                          Emergency
-                        </span>
-                      )}
-                      <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs font-medium">
-                        {campaign.type}
-                      </span>
-                    </div>
-                    <h4 className="text-xl font-semibold text-gray-800">{campaign.title}</h4>
-                    <p className="text-gray-600 mt-1">{campaign.description}</p>
-                    <p className="text-sm text-gray-500 mt-2">
-                      by <span className="font-medium text-gray-700">{campaign.organization}</span>
-                    </p>
-                  </div>
-                </div>
-
-                {/* Progress Stats */}
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="font-semibold">${campaign.raised.toLocaleString()} raised</span>
-                      <span className="text-gray-600">Goal: ${campaign.goal.toLocaleString()}</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-rose-500 h-2 rounded-full transition-all duration-500"
-                        style={{ width: `${campaign.progress}%` }}
-                      ></div>
-                    </div>
-                    <div className="flex justify-between text-xs text-gray-600">
-                      <div className="flex items-center gap-1">
-                        <Users className="h-3 w-3" />
-                        <span>{campaign.donors} donors</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        <span>{campaign.daysLeft} days left</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Donation Types */}
-                  <div>
-                    <p className="text-sm font-medium text-gray-700 mb-2">Choose donation type:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {campaign.donationTypes.map((type) => (
-                        <button
-                          key={type}
-                          onClick={() => handleDonationTypeClick(campaign.id, type)}
-                          className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm transition-colors ${
-                            selectedType === type
-                              ? "bg-rose-100 text-rose-700 border border-rose-300"
-                              : "bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200"
-                          }`}
-                        >
-                          <DonationIcon type={type} />
-                          <span>{type}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Donate Button */}
-                  <Link
-                    to={`/donation-confirmation/${campaign.id}/${selectedType.toLowerCase()}`}
-                    className={`block text-center w-full py-3 rounded-lg font-medium transition-colors ${
-                      campaign.urgent
-                        ? "bg-red-600 text-white hover:bg-red-700"
-                        : "bg-teal-500 text-white hover:bg-teal-600"
-                    }`}
-                  >
-                    Donate Now
-                  </Link>
-                </div>
-              </div>
-            );
-          })}
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold text-gray-800">
+            {showEmergencyOnly ? "Emergency Campaigns" : "Recommended for You"}
+          </h3>
+          {showEmergencyOnly && (
+            <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-medium">
+              {filteredCampaigns.length} urgent campaign(s)
+            </span>
+          )}
         </div>
+        
+        {filteredCampaigns.length === 0 ? (
+          <div className="bg-white rounded-lg shadow-md border border-gray-200 p-8 text-center">
+            <div className="max-w-md mx-auto">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Package className="h-8 w-8 text-gray-400" />
+              </div>
+              <h4 className="text-lg font-semibold text-gray-800 mb-2">No Emergency Campaigns Available</h4>
+              <p className="text-gray-600 mb-4">
+                There are currently no emergency campaigns that match your preferences.
+              </p>
+              <button
+                onClick={handleShowAllCampaigns}
+                className="bg-rose-500 text-white px-6 py-2 rounded-lg hover:bg-rose-600 transition-colors font-medium"
+              >
+                View All Campaigns
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {filteredCampaigns.map((campaign) => {
+              const selectedType = selectedDonationTypes[campaign.id] || campaign.donationTypes[0];
+              
+              return (
+                <div key={campaign.id} className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+                  {/* Campaign Header */}
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        {campaign.urgent && (
+                          <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-medium">
+                            Emergency
+                          </span>
+                        )}
+                        <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs font-medium">
+                          {campaign.type}
+                        </span>
+                      </div>
+                      <h4 className="text-xl font-semibold text-gray-800">{campaign.title}</h4>
+                      <p className="text-gray-600 mt-1">{campaign.description}</p>
+                      <p className="text-sm text-gray-500 mt-2">
+                        by <span className="font-medium text-gray-700">{campaign.organization}</span>
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Progress Stats */}
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="font-semibold">${campaign.raised.toLocaleString()} raised</span>
+                        <span className="text-gray-600">Goal: ${campaign.goal.toLocaleString()}</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="bg-rose-500 h-2 rounded-full transition-all duration-500"
+                          style={{ width: `${campaign.progress}%` }}
+                        ></div>
+                      </div>
+                      <div className="flex justify-between text-xs text-gray-600">
+                        <div className="flex items-center gap-1">
+                          <Users className="h-3 w-3" />
+                          <span>{campaign.donors} donors</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          <span>{campaign.daysLeft} days left</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Donation Types */}
+                    <div>
+                      <p className="text-sm font-medium text-gray-700 mb-2">Choose donation type:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {campaign.donationTypes.map((type) => (
+                          <button
+                            key={type}
+                            onClick={() => handleDonationTypeClick(campaign.id, type)}
+                            className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm transition-colors ${
+                              selectedType === type
+                                ? "bg-rose-100 text-rose-700 border border-rose-300"
+                                : "bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200"
+                            }`}
+                          >
+                            <DonationIcon type={type} />
+                            <span>{type}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Donate Button */}
+                    <Link
+                      to={`/donation-confirmation/${campaign.id}/${selectedType.toLowerCase()}`}
+                      className={`block text-center w-full py-3 rounded-lg font-medium transition-colors ${
+                        campaign.urgent
+                          ? "bg-red-600 text-white hover:bg-red-700"
+                          : "bg-teal-500 text-white hover:bg-teal-600"
+                      }`}
+                    >
+                      Donate Now
+                    </Link>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
+
 
   const renderDonationHistory = () => (
     <div className="space-y-6">
@@ -436,7 +527,13 @@ export default function DonorDashboard() {
                   return (
                     <button
                       key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
+                      onClick={() => {
+                        setActiveTab(tab.id);
+                        // Reset emergency filter when switching tabs
+                        if (tab.id !== "personalized") {
+                          setShowEmergencyOnly(false);
+                        }
+                      }}
                       className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
                         activeTab === tab.id
                           ? "bg-rose-50 text-rose-700 border border-rose-200"

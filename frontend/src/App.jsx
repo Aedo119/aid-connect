@@ -23,6 +23,7 @@ import NGODashboard from "./pages/NGODashboard.jsx";
 import EditCampaign from "./pages/EditCampaign.jsx";
 import NewCampaign from "./pages/NewCampaign.jsx";
 import DonorDashboard from "./pages/DonorDashboard.jsx";
+import AllCampaigns from "./components/AllCampaigns.jsx";
 function HomePage() {
 
 
@@ -72,6 +73,9 @@ export default function App() {
 
             {/* Donation Page */}
             <Route path="/donate/:id" element={<DonationPage />} />
+            
+            {/* All Campaigns Page */}
+            <Route path="/campaigns" element={<AllCampaigns />} />
 
             {/* Donor Sign Up Page */}
             <Route path="/donor-signup" element={<DonorSignUp />} />
