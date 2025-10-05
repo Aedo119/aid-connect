@@ -55,6 +55,8 @@ CREATE TABLE Campaigns (
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
     image_url VARCHAR(500),
+    raised_amount DECIMAL(12,2) default 0,
+    donors INT default 0,
     status ENUM('Active', 'Completed', 'Cancelled') DEFAULT 'Active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
