@@ -53,9 +53,10 @@ export const validateUser = async ({ email, password }) => {
     throw new Error("Invalid email or password");
   }
 
+  
   console.log("User validation successful");
-
   let name=decrypt(foundUser.first_name)
+  console.log(name);
 
   // Return user data with decrypted email
   return {
