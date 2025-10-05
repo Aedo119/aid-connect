@@ -18,13 +18,19 @@ import {
   Calendar,
   MapPin,
   Eye,
-  Receipt
+  Receipt,
+  Save,
+  X,
+  Plus,
+  Trash2
 } from 'lucide-react';
 
 // Mock data
-const userData = {
+const initialUserData = {
   name: "Jane Smith",
   email: "joannasara.jipson2006@gmail.com",
+  phone: "+1 (555) 123-4567",
+  address: "123 Main Street, City, State 12345",
   totalDonated: 525,
   campaignsSupported: 4,
   impactScore: 87,
@@ -32,6 +38,21 @@ const userData = {
   preferredCauses: ["Environment", "Education"],
   donationTypes: ["Money", "Clothes"]
 };
+
+const availableCauses = [
+  "Environment", "Education", "Healthcare", "Poverty Alleviation",
+  "Disaster Relief", "Animal Welfare", "Arts & Culture", "Human Rights"
+];
+
+const availableDonationTypes = ["Money", "Food", "Clothes", "Medical Supplies"];
+
+const donationRanges = [
+  "$10 - $50",
+  "$50 - $200", 
+  "$200 - $500",
+  "$500 - $1000",
+  "$1000+"
+];
 
 const campaigns = [
   {
@@ -156,6 +177,103 @@ export default function DonorDashboard() {
   const [selectedDonationTypes, setSelectedDonationTypes] = useState({});
   const [showEmergencyOnly, setShowEmergencyOnly] = useState(false);
   const [selectedReceipt, setSelectedReceipt] = useState(null);
+  const [userData, setUserData] = useState(initialUserData);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [isEditingPreferences, setIsEditingPreferences] = useState(false);
+  const [profileForm, setProfileForm] = useState(initialUserData);
+  const [preferencesForm, setPreferencesForm] = useState({
+    preferredCauses: initialUserData.preferredCauses,
+    donationRange: initialUserData.donationRange,
+    donationTypes: initialUserData.donationTypes
+  });
+  const [newCause, setNewCause] = useState("");
+  const [showCauseDropdown, setShowCauseDropdown] = useState(false);
+
+  // Profile editing functions
+  const handleEditProfile = () => {
+    setProfileForm(userData);
+    setIsEditingProfile(true);
+  };
+
+  const handleSaveProfile = () => {
+    setUserData(profileForm);
+    setIsEditingProfile(false);
+    // Here you would typically make an API call to save the profile
+  };
+
+  const handleCancelEditProfile = () => {
+    setProfileForm(userData);
+    setIsEditingProfile(false);
+  };
+
+  const handleProfileChange = (field, value) => {
+    setProfileForm(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  // Preferences editing functions
+  const handleEditPreferences = () => {
+    setPreferencesForm({
+      preferredCauses: userData.preferredCauses,
+      donationRange: userData.donationRange,
+      donationTypes: userData.donationTypes
+    });
+    setIsEditingPreferences(true);
+  };
+
+  const handleSavePreferences = () => {
+    setUserData(prev => ({
+      ...prev,
+      ...preferencesForm
+    }));
+    setIsEditingPreferences(false);
+    // Here you would typically make an API call to save the preferences
+  };
+
+  const handleCancelEditPreferences = () => {
+    setPreferencesForm({
+      preferredCauses: userData.preferredCauses,
+      donationRange: userData.donationRange,
+      donationTypes: userData.donationTypes
+    });
+    setIsEditingPreferences(false);
+  };
+
+  const handleAddCause = (cause) => {
+    if (!preferencesForm.preferredCauses.includes(cause)) {
+      setPreferencesForm(prev => ({
+        ...prev,
+        preferredCauses: [...prev.preferredCauses, cause]
+      }));
+    }
+    setNewCause("");
+    setShowCauseDropdown(false);
+  };
+
+  const handleRemoveCause = (causeToRemove) => {
+    setPreferencesForm(prev => ({
+      ...prev,
+      preferredCauses: prev.preferredCauses.filter(cause => cause !== causeToRemove)
+    }));
+  };
+
+  const handleAddDonationType = (type) => {
+    if (!preferencesForm.donationTypes.includes(type)) {
+      setPreferencesForm(prev => ({
+        ...prev,
+        donationTypes: [...prev.donationTypes, type]
+      }));
+    }
+  };
+
+  const handleRemoveDonationType = (typeToRemove) => {
+    setPreferencesForm(prev => ({
+      ...prev,
+      donationTypes: prev.donationTypes.filter(type => type !== typeToRemove)
+    }));
+  };
 
   const handleDonationTypeClick = (campaignId, donationType) => {
     setSelectedDonationTypes(prev => ({
@@ -807,71 +925,264 @@ export default function DonorDashboard() {
       <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
         <div className="flex justify-between items-start mb-4">
           <h3 className="text-lg font-semibold text-gray-800">Profile Information</h3>
-          <button className="flex items-center gap-2 text-rose-600 hover:text-rose-700 transition-colors">
-            <Edit3 className="h-4 w-4" />
-            <span className="text-sm font-medium">Edit Profile</span>
-          </button>
+          {!isEditingProfile ? (
+            <button 
+              onClick={handleEditProfile}
+              className="flex items-center gap-2 text-rose-600 hover:text-rose-700 transition-colors"
+            >
+              <Edit3 className="h-4 w-4" />
+              <span className="text-sm font-medium">Edit Profile</span>
+            </button>
+          ) : (
+            <div className="flex gap-2">
+              <button 
+                onClick={handleSaveProfile}
+                className="flex items-center gap-2 bg-rose-500 text-white px-3 py-1 rounded-lg hover:bg-rose-600 transition-colors text-sm"
+              >
+                <Save className="h-3 w-3" />
+                Save
+              </button>
+              <button 
+                onClick={handleCancelEditProfile}
+                className="flex items-center gap-2 bg-gray-500 text-white px-3 py-1 rounded-lg hover:bg-gray-600 transition-colors text-sm"
+              >
+                <X className="h-3 w-3" />
+                Cancel
+              </button>
+            </div>
+          )}
         </div>
-        <div className="space-y-3">
-          <div>
-            <p className="font-medium text-gray-800">{userData.name}</p>
-            <p className="text-gray-600 text-sm">{userData.email}</p>
+
+        {!isEditingProfile ? (
+          <div className="space-y-3">
+            <div>
+              <p className="font-medium text-gray-800">{userData.name}</p>
+              <p className="text-gray-600 text-sm">{userData.email}</p>
+              <p className="text-gray-600 text-sm">{userData.phone}</p>
+              <p className="text-gray-600 text-sm">{userData.address}</p>
+            </div>
+            <button className="text-rose-600 hover:text-rose-700 text-sm font-medium">
+              Contact Owner
+            </button>
           </div>
-          <button className="text-rose-600 hover:text-rose-700 text-sm font-medium">
-            Contact Owner
-          </button>
-        </div>
+        ) : (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+              <input
+                type="text"
+                value={profileForm.name}
+                onChange={(e) => handleProfileChange('name', e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-300 focus:border-rose-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+              <input
+                type="email"
+                value={profileForm.email}
+                onChange={(e) => handleProfileChange('email', e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-300 focus:border-rose-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+              <input
+                type="tel"
+                value={profileForm.phone}
+                onChange={(e) => handleProfileChange('phone', e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-300 focus:border-rose-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
+              <textarea
+                value={profileForm.address}
+                onChange={(e) => handleProfileChange('address', e.target.value)}
+                rows={3}
+                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-300 focus:border-rose-500"
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Donation Preferences */}
       <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">Donation Preferences</h3>
-        
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Preferred Causes</label>
-            <div className="flex flex-wrap gap-2">
-              {userData.preferredCauses.map((cause, index) => (
-                <span
-                  key={cause}
-                  className="bg-rose-100 text-rose-700 px-3 py-1 rounded-full text-sm font-medium"
-                >
-                  {cause}
-                </span>
-              ))}
-              <button className="text-rose-600 hover:text-rose-700 text-sm font-medium">
-                + Add more
+        <div className="flex justify-between items-start mb-4">
+          <h3 className="text-lg font-semibold text-gray-800">Donation Preferences</h3>
+          {!isEditingPreferences ? (
+            <button 
+              onClick={handleEditPreferences}
+              className="flex items-center gap-2 text-rose-600 hover:text-rose-700 transition-colors"
+            >
+              <Edit3 className="h-4 w-4" />
+              <span className="text-sm font-medium">Update Preferences</span>
+            </button>
+          ) : (
+            <div className="flex gap-2">
+              <button 
+                onClick={handleSavePreferences}
+                className="flex items-center gap-2 bg-rose-500 text-white px-3 py-1 rounded-lg hover:bg-rose-600 transition-colors text-sm"
+              >
+                <Save className="h-3 w-3" />
+                Save
+              </button>
+              <button 
+                onClick={handleCancelEditPreferences}
+                className="flex items-center gap-2 bg-gray-500 text-white px-3 py-1 rounded-lg hover:bg-gray-600 transition-colors text-sm"
+              >
+                <X className="h-3 w-3" />
+                Cancel
               </button>
             </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Donation Range</label>
-            <p className="text-gray-800 font-medium">{userData.donationRange} per donation</p>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Donation Types</label>
-            <div className="flex flex-wrap gap-2">
-              {userData.donationTypes.map((type) => (
-                <span
-                  key={type}
-                  className="flex items-center gap-1 bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-medium"
-                >
-                  <DonationIcon type={type} />
-                  {type}
-                </span>
-              ))}
-              <button className="text-rose-600 hover:text-rose-700 text-sm font-medium">
-                + Add more
-              </button>
-            </div>
-          </div>
+          )}
         </div>
+        
+        {!isEditingPreferences ? (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Preferred Causes</label>
+              <div className="flex flex-wrap gap-2">
+                {userData.preferredCauses.map((cause, index) => (
+                  <span
+                    key={cause}
+                    className="bg-rose-100 text-rose-700 px-3 py-1 rounded-full text-sm font-medium"
+                  >
+                    {cause}
+                  </span>
+                ))}
+              </div>
+            </div>
 
-        <button className="w-full mt-6 bg-rose-500 text-white py-3 rounded-lg hover:bg-rose-600 transition-colors font-medium">
-          Update Preferences
-        </button>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Donation Range</label>
+              <p className="text-gray-800 font-medium">{userData.donationRange} per donation</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Donation Types</label>
+              <div className="flex flex-wrap gap-2">
+                {userData.donationTypes.map((type) => (
+                  <span
+                    key={type}
+                    className="flex items-center gap-1 bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-medium"
+                  >
+                    <DonationIcon type={type} />
+                    {type}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Preferred Causes</label>
+              <div className="flex flex-wrap gap-2 mb-3">
+                {preferencesForm.preferredCauses.map((cause) => (
+                  <span
+                    key={cause}
+                    className="flex items-center gap-1 bg-rose-100 text-rose-700 px-3 py-1 rounded-full text-sm font-medium"
+                  >
+                    {cause}
+                    <button
+                      onClick={() => handleRemoveCause(cause)}
+                      className="text-rose-700 hover:text-rose-800"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+              <div className="relative">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newCause}
+                    onChange={(e) => setNewCause(e.target.value)}
+                    onFocus={() => setShowCauseDropdown(true)}
+                    placeholder="Add a cause..."
+                    className="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-300 focus:border-rose-500"
+                  />
+                  <button
+                    onClick={() => setShowCauseDropdown(!showCauseDropdown)}
+                    className="bg-rose-500 text-white p-2 rounded-lg hover:bg-rose-600 transition-colors"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </button>
+                </div>
+                
+                {showCauseDropdown && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    {availableCauses
+                      .filter(cause => !preferencesForm.preferredCauses.includes(cause))
+                      .map((cause) => (
+                        <button
+                          key={cause}
+                          onClick={() => handleAddCause(cause)}
+                          className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors"
+                        >
+                          {cause}
+                        </button>
+                      ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Donation Range</label>
+              <select
+                value={preferencesForm.donationRange}
+                onChange={(e) => setPreferencesForm(prev => ({ ...prev, donationRange: e.target.value }))}
+                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-300 focus:border-rose-500"
+              >
+                {donationRanges.map(range => (
+                  <option key={range} value={range}>{range}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Donation Types</label>
+              <div className="space-y-2">
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {preferencesForm.donationTypes.map((type) => (
+                    <span
+                      key={type}
+                      className="flex items-center gap-1 bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-medium"
+                    >
+                      <DonationIcon type={type} />
+                      {type}
+                      <button
+                        onClick={() => handleRemoveDonationType(type)}
+                        className="text-gray-700 hover:text-gray-800"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {availableDonationTypes
+                    .filter(type => !preferencesForm.donationTypes.includes(type))
+                    .map((type) => (
+                      <button
+                        key={type}
+                        onClick={() => handleAddDonationType(type)}
+                        className="flex items-center gap-1 bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm hover:bg-gray-300 transition-colors"
+                      >
+                        <Plus className="h-3 w-3" />
+                        <DonationIcon type={type} />
+                        {type}
+                      </button>
+                    ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
