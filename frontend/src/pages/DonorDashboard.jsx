@@ -186,9 +186,9 @@ export default function DonorDashboard() {
   const { user } = useAuth();
 
   useEffect(() => {
-    if(!user || user.type!="donor"){
-      navigate("/donor-login");
-    }
+    // if(!user || user.type!="donor"){
+    //   navigate("/donor-login");
+    // }
   },[user]);
   const [showEmergencyOnly, setShowEmergencyOnly] = useState(false);
   const [selectedReceipt, setSelectedReceipt] = useState(null);
