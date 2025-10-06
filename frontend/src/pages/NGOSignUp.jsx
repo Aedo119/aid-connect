@@ -44,21 +44,47 @@ export default function NGOSignUp() {
     });
   };
 
+  // Validation function
+  const validateForm = () => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^[0-9]{7,15}$/; // 7–15 digits only
+    const postalRegex = /^[a-zA-Z0-9]{4,10}$/;
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&._-])[A-Za-z\d@$!%*?&._-]{8,}$/;
+
+    if (!formData.name.trim()) {
+      return "Organization name is required";
+    }
+    if (!emailRegex.test(formData.email)) {
+      return "Invalid email address";
+    }
+    if (!phoneRegex.test(formData.phoneNumber)) {
+      return "Phone number must be 7-15 digits";
+    }
+    if (!postalRegex.test(formData.postalCode)) {
+      return "Postal code must be 4-10 characters (letters or numbers)";
+    }
+    if (!passwordRegex.test(formData.password)) {
+      return "Password must be at least 8 characters and include uppercase, lowercase, number, and special character";
+    }
+    if (formData.password !== formData.confirmPassword) {
+      return "Passwords do not match";
+    }
+    if (!agreeToTerms) {
+      return "Please agree to the Terms of Service and Privacy Policy";
+    }
+    return null;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
     setSuccess("");
 
-    // Validation
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
-      setLoading(false);
-      return;
-    }
-
-    if (!agreeToTerms) {
-      setError("Please agree to the Terms of Service and Privacy Policy");
+    const validationError = validateForm();
+    if (validationError) {
+      setError(validationError);
       setLoading(false);
       return;
     }
@@ -66,7 +92,7 @@ export default function NGOSignUp() {
     try {
       const { confirmPassword, ...signupData } = formData;
       const response = await authAPI.orgSignup(signupData);
-      setSuccess(response.message);
+      setSuccess(response.message || "Signup successful!");
       setTimeout(() => {
         navigate("/ngo-login");
       }, 2000);
@@ -79,18 +105,16 @@ export default function NGOSignUp() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-yellow-100 via-teal-500 via-rose-300 to-rose-500">
-      {/* Main content with padding */}
+      {/* Main content */}
       <div className="flex-1 flex flex-col items-center justify-center px-4 py-12">
-        {/* Card */}
         <div className="bg-white/90 backdrop-blur-md p-8 rounded-2xl shadow-xl w-full max-w-md">
-          {/* Heart Icon at the top */}
+          {/* Heart Icon */}
           <div className="flex justify-center mb-4">
             <div className="bg-rose-100 p-3 rounded-full">
               <Heart className="h-8 w-8 text-rose-500 fill-rose-500" />
             </div>
           </div>
 
-          {/* Heading */}
           <h2 className="text-3xl font-extrabold text-gray-800 text-center mb-2">
             Join AidConnect+
           </h2>
@@ -98,14 +122,14 @@ export default function NGOSignUp() {
             Create your organization account and start making a difference.
           </p>
 
-          {/* Error Message */}
+          {/* Error */}
           {error && (
             <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
               {error}
             </div>
           )}
 
-          {/* Success Message */}
+          {/* Success */}
           {success && (
             <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg text-sm">
               {success}
@@ -113,7 +137,7 @@ export default function NGOSignUp() {
           )}
 
           <form onSubmit={handleSubmit}>
-            {/* Organization Name */}
+            {/* Org Name */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Organization Name
@@ -175,6 +199,9 @@ export default function NGOSignUp() {
                   👁
                 </button>
               </div>
+              <p className="text-xs text-gray-500 mt-1">
+                Must be 8+ chars, include uppercase, lowercase, number, special symbol
+              </p>
             </div>
 
             {/* Confirm Password */}
@@ -195,7 +222,9 @@ export default function NGOSignUp() {
                 />
                 <button
                   type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  onClick={() =>
+                    setShowConfirmPassword(!showConfirmPassword)
+                  }
                   className="text-gray-400 hover:text-gray-600 ml-2"
                 >
                   👁
@@ -203,7 +232,7 @@ export default function NGOSignUp() {
               </div>
             </div>
 
-            {/* Phone Number */}
+            {/* Phone */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Phone Number
@@ -241,7 +270,7 @@ export default function NGOSignUp() {
               </div>
             </div>
 
-            {/* Postal Code */}
+            {/* Postal */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Postal Code
@@ -278,7 +307,7 @@ export default function NGOSignUp() {
               </div>
             </div>
 
-            {/* Organization Description */}
+            {/* Description */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Organization Description
@@ -293,7 +322,7 @@ export default function NGOSignUp() {
               ></textarea>
             </div>
 
-            {/* Terms Agreement */}
+            {/* Terms */}
             <div className="flex items-center mb-6 text-sm">
               <label className="flex items-center space-x-2 cursor-pointer">
                 <div className="relative">
@@ -328,7 +357,7 @@ export default function NGOSignUp() {
               </label>
             </div>
 
-            {/* Create Account Button */}
+            {/* Submit */}
             <button
               type="submit"
               disabled={loading}
@@ -356,7 +385,6 @@ export default function NGOSignUp() {
         </div>
       </div>
 
-      {/* Footer */}
       <Footer />
     </div>
   );

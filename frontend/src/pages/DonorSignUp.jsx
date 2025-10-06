@@ -33,21 +33,33 @@ export default function DonorSignUp() {
     });
   };
 
+  const validateForm = () => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^[0-9]{10,15}$/;
+    const postalRegex = /^[0-9]{4,10}$/;
+
+    if (!formData.firstname.trim()) return "First name is required";
+    if (!formData.lastname.trim()) return "Last name is required";
+    if (!emailRegex.test(formData.email)) return "Please enter a valid email address";
+    if (formData.password.length < 6) return "Password must be at least 6 characters";
+    if (formData.password !== formData.confirmPassword) return "Passwords do not match";
+    if (!phoneRegex.test(formData.phoneNumber)) return "Please enter a valid phone number (10–15 digits)";
+    if (!formData.address.trim()) return "Address is required";
+    if (!postalRegex.test(formData.postalCode)) return "Please enter a valid postal code";
+    if (!agreeToTerms) return "Please agree to the Terms of Service and Privacy Policy";
+    return null;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
     setSuccess("");
 
-    // Validation
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
-      setLoading(false);
-      return;
-    }
-
-    if (!agreeToTerms) {
-      setError("Please agree to the Terms of Service and Privacy Policy");
+    // Run validation
+    const validationError = validateForm();
+    if (validationError) {
+      setError(validationError);
       setLoading(false);
       return;
     }
@@ -55,7 +67,7 @@ export default function DonorSignUp() {
     try {
       const { confirmPassword, ...signupData } = formData;
       const response = await authAPI.userSignup(signupData);
-      setSuccess(response.message);
+      setSuccess(response.message || "Account created successfully!");
       setTimeout(() => {
         navigate("/donor-login");
       }, 2000);
@@ -267,8 +279,6 @@ export default function DonorSignUp() {
                 />
               </div>
             </div>
-
-          
 
             {/* Terms Agreement */}
             <div className="flex items-center mb-6 text-sm">

@@ -34,12 +34,16 @@ function StatIcon({ type }) {
 
 // Map donation types to icons
 function DonationIcon({ type }) {
+  // Add safety check for type
+  if (!type) return <Heart className="h-4 w-4 text-rose-600" />;
+  
   const iconMap = {
     money: <DollarSign className="h-4 w-4 text-green-600" />,
     food: <Package className="h-4 w-4 text-yellow-600" />,
     clothes: <Shirt className="h-4 w-4 text-blue-600" />,
     "medical supplies": <Cross className="h-4 w-4 text-red-600" />,
   };
+  
   return (
     iconMap[type.toLowerCase()] || <Heart className="h-4 w-4 text-rose-600" />
   );
@@ -50,22 +54,26 @@ export default function FeaturedCampaigns() {
   const navigate = useNavigate();
   const [selectedDonationTypes, setSelectedDonationTypes] = useState({});
   const { user } = useAuth();
+  
   useEffect(() => {
     const fetchCampaigns = async () => {
       try {
         const result = await api.get("/campaign/all");
-        setCampaigns(result.data.campaigns);
+        setCampaigns(result.data.campaigns || []);
       } catch (err) {
         console.error("Failed to fetch campaigns:", err);
+        setCampaigns([]);
       }
     };
     fetchCampaigns();
   }, [user]);
 
-  // Show only first 3 campaigns as featured
-  const featuredCampaigns = campaigns.slice(0, 3);
+  // Show only first 3 campaigns as featured with safety check
+  const featuredCampaigns = campaigns ? campaigns.slice(0, 3) : [];
 
   const handleDonationTypeClick = (campaignId, donationType) => {
+    if (!donationType) return;
+    
     setSelectedDonationTypes((prev) => ({
       ...prev,
       [campaignId]: donationType.toLowerCase(),
@@ -85,10 +93,15 @@ export default function FeaturedCampaigns() {
 
         <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {featuredCampaigns.map((c) => {
+            if (!c) return null; // Skip if campaign is undefined
+            
             const pct = (c.raised_amount / c.goal_amount) * 100;
+            
+            // Safe access to donationTypes with fallback
+            const donationTypes = Array.isArray(c.donationTypes) ? c.donationTypes : [];
             const selectedType =
               selectedDonationTypes[c.campaign_id] ||
-              c.donationTypes[0].toLowerCase();
+              (donationTypes[0] ? donationTypes[0].toLowerCase() : "money");
 
             return (
               <article
@@ -123,15 +136,15 @@ export default function FeaturedCampaigns() {
                   className="flex-grow space-y-3 p-5 cursor-pointer"
                 >
                   <h3 className="text-lg font-semibold leading-snug hover:text-teal-600 transition-colors">
-                    {c.title}
+                    {c.title || "Untitled Campaign"}
                   </h3>
                   <p className="text-sm text-gray-600 line-clamp-2">
-                    {c.description}
+                    {c.description || "No description available."}
                   </p>
                   <p className="text-xs text-gray-500">
                     by{" "}
                     <span className="font-medium text-gray-700">
-                      {c.organization_name}
+                      {c.organization_name || "Unknown Organization"}
                     </span>
                   </p>
                 </div>
@@ -141,55 +154,62 @@ export default function FeaturedCampaigns() {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
                       <span className="font-semibold">
-                        ${c.raised_amount} raised
+                        ${c.raised_amount || 0} raised
                       </span>
                       <span className="text-gray-600">
-                        Goal: ${c.goal_amount}
+                        Goal: ${c.goal_amount || 0}
                       </span>
                     </div>
                     <ProgressBar value={pct} />
                     <div className="flex items-center justify-between text-xs text-gray-600">
                       <div className="flex items-center gap-1">
                         <StatIcon type="donors" />
-                        <span>{c.donors} donors</span>
+                        <span>{c.donors || 0} donors</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <StatIcon type="time" />
                         <span>
-                          {Math.floor(
-                            (new Date(c.end_date) - new Date(c.start_date)) /
-                              (1000 * 60 * 60 * 24)
-                          )}{" "}
+                          {c.end_date && c.start_date
+                            ? Math.floor(
+                                (new Date(c.end_date) - new Date(c.start_date)) /
+                                  (1000 * 60 * 60 * 24)
+                              )
+                            : 0}{" "}
                           days left
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Donation type chips with icons */}
-                  <div className="flex flex-wrap gap-2">
-                    {c.donationTypes.map((t) => {
-                      const typeKey = t.toLowerCase();
-                      const isSelected = selectedType === typeKey;
+                  {/* Donation type chips with icons - only render if we have donation types */}
+                  {donationTypes.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {donationTypes.map((t) => {
+                        if (!t) return null; // Skip undefined types
+                        
+                        const typeKey = t.toLowerCase();
+                        const isSelected = selectedType === typeKey;
 
-                      return (
-                        <button
-                          key={t}
-                          onClick={() =>
-                            handleDonationTypeClick(c.campaign_id, t)
-                          }
-                          className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors ${
-                            isSelected
-                              ? "bg-rose-100 text-rose-700 border border-rose-300"
-                              : "bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200"
-                          }`}
-                        >
-                          <DonationIcon type={t} />
-                          <span>{t}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
+                        return (
+                          <button
+                            key={t}
+                            onClick={(e) => {
+                              e.stopPropagation(); // Prevent navigation when clicking donation type
+                              handleDonationTypeClick(c.campaign_id, t);
+                            }}
+                            className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors ${
+                              isSelected
+                                ? "bg-rose-100 text-rose-700 border border-rose-300"
+                                : "bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200"
+                            }`}
+                          >
+                            <DonationIcon type={t} />
+                            <span>{t}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
 
                   <Link
                     to={`/donation-confirmation/${c.campaign_id}/${selectedType}`}
