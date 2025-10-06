@@ -64,9 +64,6 @@ export default function NGOSignUp() {
     if (!postalRegex.test(formData.postalCode)) {
       return "Postal code must be 4-10 characters (letters or numbers)";
     }
-    if (!passwordRegex.test(formData.password)) {
-      return "Password must be at least 8 characters and include uppercase, lowercase, number, and special character";
-    }
     if (formData.password !== formData.confirmPassword) {
       return "Passwords do not match";
     }

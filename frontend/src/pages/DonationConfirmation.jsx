@@ -156,9 +156,7 @@ export default function DonationConfirmation() {
       if (formData.paymentMethod === "card") {
         if (!formData.cardNumber) {
           newErrors.cardNumber = "Card number is required";
-        } else if (!/^\d{16}$/.test(formData.cardNumber.replace(/\s/g, ""))) {
-          newErrors.cardNumber = "Card number must be 16 digits";
-        }
+        } 
 
         if (!formData.cardExpiry) {
           newErrors.cardExpiry = "Expiry date is required";

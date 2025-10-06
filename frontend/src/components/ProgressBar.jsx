@@ -1,5 +1,6 @@
 export default function ProgressBar({ value = 0 }) {
   const pct = Math.max(0, Math.min(100, Math.round(value)));
+  
   return (
     <div>
       <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200">

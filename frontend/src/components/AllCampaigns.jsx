@@ -43,14 +43,14 @@ function StatIcon({ type }) {
 function DonationIcon({ type }) {
   // Add safety check for type
   if (!type) return <Heart className="h-4 w-4 text-rose-600" />;
-  
+
   const iconMap = {
     money: <DollarSign className="h-4 w-4 text-green-600" />,
     food: <Package className="h-4 w-4 text-yellow-600" />,
     clothes: <Shirt className="h-4 w-4 text-blue-600" />,
     "medical supplies": <Cross className="h-4 w-4 text-red-600" />,
   };
-  
+
   return (
     iconMap[type.toLowerCase()] || <Heart className="h-4 w-4 text-rose-600" />
   );
@@ -64,7 +64,7 @@ export default function AllCampaigns() {
 
   const handleDonationTypeClick = (campaignId, donationType) => {
     if (!donationType) return;
-    
+
     setSelectedDonationTypes((prev) => ({
       ...prev,
       [campaignId]: donationType.toLowerCase(),
@@ -169,7 +169,9 @@ export default function AllCampaigns() {
         {campaigns.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-500 text-lg">No campaigns found.</p>
-            <p className="text-gray-400 mt-2">Check back later for new campaigns.</p>
+            <p className="text-gray-400 mt-2">
+              Check back later for new campaigns.
+            </p>
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -182,18 +184,24 @@ export default function AllCampaigns() {
               const pct = Math.min((raised / goal) * 100, 100); // Cap at 100%
 
               // Safe access to donationTypes with fallback
-              const donationTypes = Array.isArray(c.donationTypes) ? c.donationTypes : ["money"];
+              const donationTypes = Array.isArray(c.donationTypes)
+                ? c.donationTypes
+                : ["money"];
               const selectedType =
                 selectedDonationTypes[c.campaign_id] ||
                 (donationTypes[0] ? donationTypes[0].toLowerCase() : "money");
 
               // Safe date calculation
-              const daysLeft = c.end_date && c.start_date 
-                ? Math.max(0, Math.floor(
-                    (new Date(c.end_date) - new Date(c.start_date)) /
-                      (1000 * 60 * 60 * 24)
-                  ))
-                : 0;
+              const daysLeft =
+                c.end_date && c.start_date
+                  ? Math.max(
+                      0,
+                      Math.floor(
+                        (new Date(c.end_date) - new Date(c.start_date)) /
+                          (1000 * 60 * 60 * 24)
+                      )
+                    )
+                  : 0;
 
               return (
                 <article
@@ -207,7 +215,10 @@ export default function AllCampaigns() {
                   {/* Image with badges */}
                   <div className="relative">
                     <img
-                      src={c.image || "https://via.placeholder.com/300x176?text=No+Image"}
+                      src={
+                        c.image ||
+                        "https://via.placeholder.com/300x176?text=No+Image"
+                      }
                       alt={c.title || "Campaign"}
                       className="h-44 w-full object-cover"
                     />
@@ -249,7 +260,24 @@ export default function AllCampaigns() {
                           Goal: ${goal.toLocaleString()}
                         </span>
                       </div>
-                      <ProgressBar value={pct} />
+                      <div className="mb-3">
+                        <div className="flex justify-between text-sm text-gray-600 mb-1">
+                          <span>Progress</span>
+                          <span>
+                            {(c.raised_amount / c.goal_amount) * 100}%
+                          </span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div
+                            className="h-2 rounded-full bg-rose-500"
+                            style={{
+                              width: `${
+                                (c.raised_amount / c.goal_amount) * 100
+                              }%`,
+                            }}
+                          ></div>
+                        </div>
+                      </div>
                       <div className="flex items-center justify-between text-xs text-gray-600">
                         <div className="flex items-center gap-1">
                           <StatIcon type="donors" />
@@ -267,7 +295,7 @@ export default function AllCampaigns() {
                       <div className="flex flex-wrap gap-2">
                         {donationTypes.map((t) => {
                           if (!t) return null; // Skip undefined types
-                          
+
                           const typeKey = t.toLowerCase();
                           const isSelected = selectedType === typeKey;
 
