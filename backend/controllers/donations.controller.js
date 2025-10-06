@@ -2,8 +2,22 @@ import { insertMoneyDonation } from "../models/donations.model.js";
 import { insertFoodDonation } from "../models/donations.model.js";
 import { insertClothingDonation } from "../models/donations.model.js";
 import { insertMedicalDonation } from "../models/donations.model.js";
+import { pool } from "../server.js";
+import crypto from "crypto";
 
+const IV_LENGTH = 16;
 
+function decrypt(encryptedText) {
+  if (!encryptedText) return null;
+  const ENCRYPTION_KEY = Buffer.from(process.env.ENCRYPTION_KEY, "hex");
+  const textParts = encryptedText.split(":");
+  const iv = Buffer.from(textParts.shift(), "hex");
+  const encryptedData = textParts.join(":");
+  const decipher = crypto.createDecipheriv("aes-256-cbc", ENCRYPTION_KEY, iv);
+  let decrypted = decipher.update(encryptedData, "hex", "utf8");
+  decrypted += decipher.final("utf8");
+  return decrypted;
+}
 
 // handle money donation submission
 export const createMoneyDonation = async (req, res) => {
@@ -19,14 +33,14 @@ export const createMoneyDonation = async (req, res) => {
       donor_id,
     } = req.body;
 
-    console.log("amount:",amount)
+    console.log("amount:", amount);
     // ✅ validation
     if (!amount || !campaign_id) {
       return res
         .status(400)
         .json({ message: "Amount and campaign_id are required" });
     }
-    
+
     // ✅ map frontend paymentMethod to DB enum
     let payment_method = "Cash";
     if (paymentMethod === "card") payment_method = "Credit/Debit Card";
@@ -34,7 +48,9 @@ export const createMoneyDonation = async (req, res) => {
     else if (paymentMethod === "netbanking") payment_method = "NetBanking";
 
     // ✅ create dummy transaction_id (if not from payment gateway)
-    const transaction_id = `TXN-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+    const transaction_id = `TXN-${Date.now()}-${Math.floor(
+      Math.random() * 10000
+    )}`;
 
     const donationData = {
       campaign_id,
@@ -57,8 +73,6 @@ export const createMoneyDonation = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
-
-
 
 export const createFoodDonation = async (req, res) => {
   try {
@@ -101,7 +115,6 @@ export const createFoodDonation = async (req, res) => {
   }
 };
 
-
 export const createClothingDonation = async (req, res) => {
   try {
     const {
@@ -142,7 +155,6 @@ export const createClothingDonation = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
-
 
 export const createMedicalDonation = async (req, res) => {
   try {
@@ -187,9 +199,86 @@ export const createMedicalDonation = async (req, res) => {
   }
 };
 
+export const getAllDonationsByOrg = async (req, res) => {
+  const { organization_id } = req.params;
+  console.log("irg", organization_id);
+  try {
+    // 💰 MONEY donations
+    const [money] = await pool.query(
+      `SELECT 
+          u.first_name AS donor_name,
+          d.donation_date AS date,
+          d.amount AS amount,
+          c.title AS campaign_name,
+          'Money' AS type
+       FROM MoneyDonations d
+       JOIN Campaigns c ON d.campaign_id = c.campaign_id
+       JOIN Users u ON d.donor_id = u.user_id
+       WHERE c.organization_id = ?`,
+      [organization_id]
+    );
 
+    // 🍎 FOOD donations
+    const [food] = await pool.query(
+      `SELECT 
+          u.first_name AS donor_name,
+          d.donation_date AS date,
+          d.food_items AS items,
+          c.title AS campaign_name,
+          'Food' AS type
+       FROM FoodDonations d
+       JOIN Campaigns c ON d.campaign_id = c.campaign_id
+       JOIN Users u ON d.donor_id = u.user_id
+       WHERE c.organization_id = ?`,
+      [organization_id]
+    );
 
+    // 👕 CLOTHING donations
+    const [clothes] = await pool.query(
+      `SELECT 
+          u.first_name AS donor_name,
+          d.donation_date AS date,
+          'Cloth' AS items,
+          c.title AS campaign_name,
+          'Clothing' AS type
+       FROM ClothingDonations d
+       JOIN Campaigns c ON d.campaign_id = c.campaign_id
+       JOIN Users u ON d.donor_id = u.user_id
+       WHERE c.organization_id = ?`,
+      [organization_id]
+    );
 
+    // 💊 MEDICAL donations
+    const [medical] = await pool.query(
+      `SELECT 
+          u.first_name AS donor_name,
+          d.donation_date AS date,
+          'Medical Supplies' AS items,
+          c.title AS campaign_name,
+          'Medical' AS type
+       FROM MedicalDonations d
+       JOIN Campaigns c ON d.campaign_id = c.campaign_id
+       JOIN Users u ON d.donor_id = u.user_id
+       WHERE c.organization_id = ?`,
+      [organization_id]
+    );
 
+    // Combine everything
+    let allDonations = [...money, ...food, ...clothes, ...medical];
 
+    allDonations = allDonations.map((donation) => ({
+      ...donation,
+      donor_name: donation.donor_name
+        ? decrypt(donation.donor_name)
+        : "Anonymous",
+    }));
 
+    // Sort by most recent date
+    allDonations.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    res.status(200).json({ donations: allDonations });
+  } catch (error) {
+    console.error("❌ Error fetching donations:", error);
+    res.status(500).json({ error: "Failed to fetch donations" });
+  }
+};

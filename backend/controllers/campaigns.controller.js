@@ -4,7 +4,6 @@ import crypto from "crypto";
 
 const IV_LENGTH = 16;
 
-
 function decrypt(encryptedText) {
   if (!encryptedText) return null;
   const ENCRYPTION_KEY = Buffer.from(process.env.ENCRYPTION_KEY, "hex");
@@ -143,11 +142,13 @@ export const getCampaigns = async (req, res) => {
     const [campaigns] = await pool.query(query);
 
     if (campaigns.length === 0) {
-      return res.status(200).json({ message: "No campaigns found", campaigns: [] });
+      return res
+        .status(200)
+        .json({ message: "No campaigns found", campaigns: [] });
     }
 
     // Get donation types for all campaigns
-    const campaignIds = campaigns.map(c => c.campaign_id);
+    const campaignIds = campaigns.map((c) => c.campaign_id);
     const [donationRows] = await pool.query(
       `
       SELECT cdt.campaign_id, dt.name AS donation_type
@@ -160,15 +161,15 @@ export const getCampaigns = async (req, res) => {
 
     // Map donation types to campaigns
     const donationMap = {};
-    donationRows.forEach(row => {
+    donationRows.forEach((row) => {
       if (!donationMap[row.campaign_id]) donationMap[row.campaign_id] = [];
       donationMap[row.campaign_id].push(row.donation_type);
     });
 
-    const campaignsWithDonations = campaigns.map(c => ({
+    const campaignsWithDonations = campaigns.map((c) => ({
       ...c,
       organization_name: decrypt(c.organization_name),
-      donationTypes: donationMap[c.campaign_id] || []
+      donationTypes: donationMap[c.campaign_id] || [],
     }));
 
     res.status(200).json({
@@ -177,14 +178,15 @@ export const getCampaigns = async (req, res) => {
     });
   } catch (err) {
     console.error("Error fetching campaigns:", err);
-    res.status(500).json({ message: "Internal server error", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: err.message });
   }
 };
 
-
 export const getCampaignsByOrg = async (req, res) => {
   try {
-    const  organization_id  = req.params.id; // or req.query.organization_id
+    const organization_id = req.params.id; // or req.query.organization_id
 
     if (!organization_id) {
       return res.status(400).json({ message: "organization_id is required" });
@@ -217,17 +219,19 @@ export const getCampaignsByOrg = async (req, res) => {
     );
 
     if (campaigns.length === 0) {
-      return res.status(200).json({ 
-        message: "No campaigns found", 
-        campaigns: [], 
-        summary: { total_active_campaigns: 0, total_raised: 0, total_donors: 0 } 
+      return res.status(200).json({
+        message: "No campaigns found",
+        campaigns: [],
+        summary: {
+          total_active_campaigns: 0,
+          total_raised: 0,
+          total_donors: 0,
+        },
       });
     }
 
-
-
     // Fetch donation types for campaigns
-    const campaignIds = campaigns.map(c => c.campaign_id);
+    const campaignIds = campaigns.map((c) => c.campaign_id);
     const [donationRows] = await pool.query(
       `
       SELECT cdt.campaign_id, dt.name AS donation_type
@@ -239,33 +243,38 @@ export const getCampaignsByOrg = async (req, res) => {
     );
 
     const donationMap = {};
-    donationRows.forEach(row => {
+    donationRows.forEach((row) => {
       if (!donationMap[row.campaign_id]) donationMap[row.campaign_id] = [];
       donationMap[row.campaign_id].push(row.donation_type);
     });
 
-    const campaignsWithDonations = campaigns.map(c => ({
+    const campaignsWithDonations = campaigns.map((c) => ({
       ...c,
       organization_name: decrypt(c.organization_name),
-      donationTypes: donationMap[c.campaign_id] || []
+      donationTypes: donationMap[c.campaign_id] || [],
     }));
 
     // Calculate summary statistics
-    const total_active_campaigns = campaigns.filter(c => c.status === 'Active').length;
-    const total_raised = campaigns.reduce((sum, c) => sum + (c.raised_amount || 0), 0);
-    const total_donors = campaigns.reduce((sum, c) => sum + (c.donors || 0), 0);
+    const total_active_campaigns = campaigns.filter(
+      (c) => c.status === "Active"
+    ).length;
+    const total_raised = campaigns.reduce(
+      (sum, c) => sum + Number(c.raised_amount || 0),
+      0
+    );
 
-    
+    const total_donors = campaigns.reduce((sum, c) => sum + (c.donors || 0), 0);
 
     res.status(200).json({
       message: "Campaigns fetched successfully",
       campaigns: campaignsWithDonations,
       summary: { total_active_campaigns, total_raised, total_donors },
     });
-
   } catch (err) {
     console.error("Error fetching campaigns by organization:", err);
-    res.status(500).json({ message: "Internal server error", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: err.message });
   }
 };
 
@@ -314,16 +323,17 @@ export const getCampaignById = async (req, res) => {
       [id]
     );
 
-    const donationTypes = donationRows.map(row => row.donation_type);
+    const donationTypes = donationRows.map((row) => row.donation_type);
 
     // 3️⃣ Return campaign with donation types
     res.status(200).json({
       message: "Campaign fetched successfully",
       campaign: { ...campaign, donationTypes },
     });
-
   } catch (err) {
     console.error("Error fetching campaign by ID:", err);
-    res.status(500).json({ message: "Internal server error", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: err.message });
   }
 };

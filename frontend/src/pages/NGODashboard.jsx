@@ -160,7 +160,7 @@ export default function NGODashboard() {
   const navigate = useNavigate();
   const [campaigns, setCampaigns] = useState([]);
   const [donations, setDonations] = useState([]);
-  const [summary,setSummary]=useState([]);
+  const [summary, setSummary] = useState([]);
   const [stats, setStats] = useState({
     activeCampaigns: 0,
     totalRaised: 0,
@@ -191,45 +191,13 @@ export default function NGODashboard() {
       try {
         // Simulate API call
         const id = user.id;
-        const result = await api.get(`/campaign/${id}`);
+        let result = await api.get(`/campaign/${id}`);
         console.log("results", result);
         setCampaigns(result.data.campaigns);
         setSummary(result.data.summary);
-        setDonations(mockDonations);
-
-        // // Calculate stats
-        // const activeCampaigns = mockCampaigns.filter(
-        //   (c) => c.status === "Active"
-        // ).length;
-        // const totalRaised = mockCampaigns.reduce(
-        //   (sum, campaign) => sum + campaign.raised,
-        //   0
-        // );
-        // const totalDonors = mockCampaigns.reduce(
-        //   (sum, campaign) => sum + campaign.donors,
-        //   0
-        // );
-        // const completedCampaigns = mockCampaigns.filter(
-        //   (c) => c.status === "Completed"
-        // );
-        // const successRate =
-        //   completedCampaigns.length > 0
-        //     ? Math.round(
-        //         (completedCampaigns.filter((c) => c.raised >= c.goal).length /
-        //           completedCampaigns.length) *
-        //           100
-        //       )
-        //     : 0;
-
-        // setStats({
-        //   activeCampaigns,
-        //   totalRaised,
-        //   totalDonors,
-        //   successRate,
-        // });
-
-        // Generate analytics
-        generateAnalytics(mockCampaigns, mockDonations);
+        result = await api.get(`/donations/${id}`);
+        console.log("donations:", result);
+        setDonations(result.data.donations);
 
         setLoading(false);
       } catch (error) {
@@ -240,6 +208,10 @@ export default function NGODashboard() {
     checkUser();
     fetchData();
   }, [user]);
+
+  useEffect(() => {
+    generateAnalytics(campaigns, donations);
+  }, [campaigns, donations]);
 
   const generateAnalytics = (campaignsData, donationsData) => {
     // Donation type distribution
@@ -260,9 +232,11 @@ export default function NGODashboard() {
     // Campaign performance
     const campaignPerformance = campaignsData.map((campaign) => ({
       name: campaign.title,
-      raised: campaign.raised,
-      goal: campaign.goal,
-      completion: Math.round((campaign.raised / campaign.goal) * 100),
+      raised: campaign.raised_amount,
+      goal: campaign.goal_amount,
+      completion: Math.round(
+        (campaign.raised_amount / campaign.goal_amount) * 100
+      ),
       donors: campaign.donors,
     }));
 
@@ -305,21 +279,20 @@ export default function NGODashboard() {
     });
   };
 
-
   const handleCreateCampaign = () => {
     navigate("/new-campaign");
   };
 
   const handleEditCampaign = (id) => {
     const campaign = campaigns.find((c) => c.campaign_id === id);
-    
+
     navigate(`/edit-campaign/${id}`, { state: { campaign } });
   };
 
   const handleViewCampaign = (id) => {
     const campaign = campaigns.find((c) => c.campaign_id === id);
-    console.log("inisde ngodashboard ",campaign)
-    navigate(`/donate/${id}`,{state:{campaign}});
+    console.log("inisde ngodashboard ", campaign);
+    navigate(`/donate/${id}`, { state: { campaign } });
   };
 
   const handleDeleteCampaign = async (id) => {
@@ -339,13 +312,13 @@ export default function NGODashboard() {
 
   const getDonationTypeIcon = (type) => {
     switch (type) {
-      case "money":
+      case "Money":
         return <DollarSign className="h-4 w-4 text-blue-500" />;
-      case "food":
+      case "Food":
         return <Apple className="h-4 w-4 text-green-500" />;
-      case "clothes":
+      case "Clothing":
         return <Shirt className="h-4 w-4 text-orange-500" />;
-      case "medical supplies":
+      case "Medical":
         return <Cross className="h-4 w-4 text-red-500" />;
       default:
         return <Package className="h-4 w-4 text-gray-500" />;
@@ -581,7 +554,8 @@ export default function NGODashboard() {
                 <div>
                   <p className="text-sm text-gray-600">Success Rate</p>
                   <p className="text-2xl font-bold text-gray-800">
-                    {stats.successRate}%
+                    {/* {stats.successRate}% */}
+                    25%
                   </p>
                 </div>
               </div>
@@ -636,21 +610,27 @@ export default function NGODashboard() {
                           </div>
                           <div className="flex space-x-2">
                             <button
-                              onClick={() => handleViewCampaign(campaign.campaign_id)}
+                              onClick={() =>
+                                handleViewCampaign(campaign.campaign_id)
+                              }
                               className="text-green-500 hover:text-green-700"
                               title="View Campaign"
                             >
                               <Eye className="h-4 w-4" />
                             </button>
                             <button
-                              onClick={() => handleEditCampaign(campaign.campaign_id)}
+                              onClick={() =>
+                                handleEditCampaign(campaign.campaign_id)
+                              }
                               className="text-blue-500 hover:text-blue-700"
                               title="Edit Campaign"
                             >
                               <Edit className="h-4 w-4" />
                             </button>
                             <button
-                              onClick={() => handleDeleteCampaign(campaign.campaign_id)}
+                              onClick={() =>
+                                handleDeleteCampaign(campaign.campaign_id)
+                              }
                               className="text-red-500 hover:text-red-700"
                               title="Delete Campaign"
                             >
@@ -681,12 +661,8 @@ export default function NGODashboard() {
                             ></div>
                           </div>
                           <div className="flex justify-between text-xs text-gray-500 mt-1">
-                            <span>
-                              ${campaign.raised_amount} raised
-                            </span>
-                            <span>
-                              Goal: ${campaign.goal_amount}
-                            </span>
+                            <span>${campaign.raised_amount} raised</span>
+                            <span>Goal: ${campaign.goal_amount}</span>
                           </div>
                         </div>
 
@@ -732,7 +708,7 @@ export default function NGODashboard() {
                       >
                         <div className="flex justify-between items-start mb-2">
                           <span className="font-medium text-gray-800">
-                            {donation.donor}
+                            {donation.donor_name}
                           </span>
                           <span className="text-sm text-gray-500">
                             {donation.date}
@@ -748,7 +724,7 @@ export default function NGODashboard() {
                             </span>
                           </div>
                           <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
-                            {donation.campaign}
+                            {donation.campaign_name}
                           </span>
                         </div>
                       </div>

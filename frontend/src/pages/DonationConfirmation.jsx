@@ -112,7 +112,7 @@ export default function DonationConfirmation() {
     clothingCondition: "",
     specialInstructions: "",
     campaign_id: id,
-    donor_id: user.user_id,
+    donor_id: user.id,
   });
   useEffect(() => {
     const getCampaignDet = async () => {
