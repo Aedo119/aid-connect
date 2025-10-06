@@ -79,3 +79,71 @@ CREATE TABLE CampaignDonationTypes (
     FOREIGN KEY (campaign_id) REFERENCES Campaigns(campaign_id) ON DELETE CASCADE,
     FOREIGN KEY (donation_type_id) REFERENCES DonationTypes(donation_type_id) ON DELETE CASCADE
 );
+
+CREATE TABLE MoneyDonations (
+    donation_id INT AUTO_INCREMENT PRIMARY KEY,
+    campaign_id INT NOT NULL,
+    donor_id INT, -- optional if user login exists
+    amount DECIMAL(12,2) NOT NULL,
+    payment_method ENUM('Credit/Debit Card', 'UPI', 'NetBanking', 'Cash') NOT NULL,
+    transaction_id VARCHAR(100) UNIQUE, -- from payment gateway
+    status ENUM('Pending', 'Success', 'Failed', 'Refunded') DEFAULT 'Pending',
+    donation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    -- Relationships
+    FOREIGN KEY (campaign_id) REFERENCES Campaigns(campaign_id) ON DELETE CASCADE,
+    FOREIGN KEY (donor_id) REFERENCES Users(user_id) ON DELETE SET NULL
+);
+
+CREATE TABLE FoodDonations (
+    food_donation_id INT AUTO_INCREMENT PRIMARY KEY,
+    campaign_id INT NOT NULL,
+    donor_id INT, -- optional if the donor is logged in
+    food_items TEXT NOT NULL, -- list of food items donated
+    estimated_quantity VARCHAR(255), -- e.g., "20 cans, 5 bags of rice"
+    drop_off_location VARCHAR(255),
+    preferred_time_slot VARCHAR(100),
+    special_instructions TEXT,
+    status ENUM('Pending', 'Accepted', 'Delivered', 'Cancelled') DEFAULT 'Pending',
+    donation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (campaign_id) REFERENCES Campaigns(campaign_id) ON DELETE CASCADE,
+    FOREIGN KEY (donor_id) REFERENCES Users(user_id) ON DELETE SET NULL
+);
+
+
+CREATE TABLE ClothingDonations (
+    clothing_donation_id INT AUTO_INCREMENT PRIMARY KEY,
+    campaign_id INT NOT NULL,
+    donor_id INT, -- optional if donor login exists
+    clothing_types JSON NOT NULL, -- e.g. ["Adult Clothing", "Shoes", "Winter Wear"]
+    conditions ENUM('New', 'Like new', 'Fair','Good') NOT NULL,
+    drop_off_location VARCHAR(255),
+    special_instructions TEXT,
+    status ENUM('Pending', 'Accepted', 'Delivered', 'Cancelled') DEFAULT 'Pending',
+    donation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (campaign_id) REFERENCES Campaigns(campaign_id) ON DELETE CASCADE,
+    FOREIGN KEY (donor_id) REFERENCES Users(user_id) ON DELETE SET NULL
+);
+
+CREATE TABLE MedicalDonations (
+    medical_donation_id INT AUTO_INCREMENT PRIMARY KEY,
+    campaign_id INT NOT NULL,
+    donor_id INT, -- optional if user login exists
+    item_list JSON NOT NULL, -- e.g. ["Face Masks", "Sanitizers", "Gloves", "First Aid Kit"]
+    quantity_description VARCHAR(255), -- e.g. "10 boxes of gloves", "5 liters sanitizer"
+    expiry_date DATE, -- optional, useful for medicines
+    conditions  VARCHAR(255),
+    special_instructions TEXT,
+    pickup boolean default false,
+    status ENUM('Pending', 'Accepted', 'Delivered', 'Cancelled') DEFAULT 'Pending',
+    donation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (campaign_id) REFERENCES Campaigns(campaign_id) ON DELETE CASCADE,
+    FOREIGN KEY (donor_id) REFERENCES Users(user_id) ON DELETE SET NULL
+);
