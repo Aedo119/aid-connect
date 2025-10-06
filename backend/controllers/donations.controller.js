@@ -282,3 +282,81 @@ export const getAllDonationsByOrg = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch donations" });
   }
 };
+
+export const getUserDonationHistory = async (req, res) => {
+  const { user_id } = req.params;
+
+  try {
+    // 💰 Money Donations
+    const [money] = await pool.query(
+      `SELECT 
+          c.title AS campaign_name,
+          c.description AS campaign_desc,
+          d.donation_date AS date,
+          d.amount AS amount,
+          'Money' AS item,
+          d.status
+       FROM MoneyDonations d
+       JOIN Campaigns c ON d.campaign_id = c.campaign_id
+       WHERE d.donor_id = ?`,
+      [user_id]
+    );
+
+    // 🍎 Food Donations
+    const [food] = await pool.query(
+      `SELECT 
+          c.title AS campaign_name,
+          c.description AS campaign_desc,
+          d.donation_date AS date,
+          d.food_items AS item,
+          NULL AS amount,
+          d.status
+       FROM FoodDonations d
+       JOIN Campaigns c ON d.campaign_id = c.campaign_id
+       WHERE d.donor_id = ?`,
+      [user_id]
+    );
+
+    // 👕 Clothing Donations
+    const [clothes] = await pool.query(
+      `SELECT 
+          c.title AS campaign_name,
+          c.description AS campaign_desc,
+          d.donation_date AS date,
+          'Cloth' AS item,
+          NULL AS amount,
+          d.status
+       FROM ClothingDonations d
+       JOIN Campaigns c ON d.campaign_id = c.campaign_id
+       WHERE d.donor_id = ?`,
+      [user_id]
+    );
+
+    // 💊 Medical Donations
+    const [medical] = await pool.query(
+      `SELECT 
+          c.title AS campaign_name,
+          c.description AS campaign_desc,
+          d.donation_date AS date,
+          'Medical Supplies' AS item,
+          NULL AS amount,
+          d.status
+       FROM MedicalDonations d
+       JOIN Campaigns c ON d.campaign_id = c.campaign_id
+       WHERE d.donor_id = ?`,
+      [user_id]
+    );
+
+    // Combine all donations
+    const allDonations = [...money, ...food, ...clothes, ...medical];
+
+    // Sort by most recent donation
+    allDonations.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    res.status(200).json({ donations: allDonations });
+  } catch (error) {
+    console.error("❌ Error fetching user donations:", error);
+    res.status(500).json({ error: "Failed to fetch donation history" });
+  }
+};
+

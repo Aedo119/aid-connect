@@ -4,7 +4,8 @@ import {
   createFoodDonation,
   createClothingDonation,
   createMedicalDonation,
-  getAllDonationsByOrg
+  getAllDonationsByOrg,
+  getUserDonationHistory
 } from "../controllers/donations.controller.js";
 
 const router = express.Router();
@@ -14,5 +15,6 @@ router.post("/food", createFoodDonation);
 router.post("/clothing", createClothingDonation);
 router.post("/medical",createMedicalDonation);
 router.get("/:organization_id",getAllDonationsByOrg)
+router.get("/user/:user_id",getUserDonationHistory)
 
 export default router;

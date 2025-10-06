@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import Footer from "../components/Footer";
+import api from "../API/api";
 import {
   Heart,
   DollarSign,
@@ -22,8 +23,8 @@ import {
   Save,
   X,
   Plus,
-  Trash2
-} from 'lucide-react';
+  Trash2,
+} from "lucide-react";
 
 import { useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
@@ -44,18 +45,24 @@ const initialUserData = {
 };
 
 const availableCauses = [
-  "Environment", "Education", "Healthcare", "Poverty Alleviation",
-  "Disaster Relief", "Animal Welfare", "Arts & Culture", "Human Rights"
+  "Environment",
+  "Education",
+  "Healthcare",
+  "Poverty Alleviation",
+  "Disaster Relief",
+  "Animal Welfare",
+  "Arts & Culture",
+  "Human Rights",
 ];
 
 const availableDonationTypes = ["Money", "Food", "Clothes", "Medical Supplies"];
 
 const donationRanges = [
   "$10 - $50",
-  "$50 - $200", 
+  "$50 - $200",
   "$200 - $500",
   "$500 - $1000",
-  "$1000+"
+  "$1000+",
 ];
 
 const campaigns = [
@@ -103,12 +110,13 @@ const campaigns = [
     category: "Education",
     type: "Educational Support",
     donationTypes: ["Money", "Clothes"],
-    progress: 59
+    progress: 59,
   },
   {
     id: 4,
     title: "Hurricane Relief Fund",
-    description: "Emergency aid for communities affected by the recent hurricane.",
+    description:
+      "Emergency aid for communities affected by the recent hurricane.",
     organization: "Disaster Response Team",
     raised: 45000,
     goal: 75000,
@@ -118,11 +126,11 @@ const campaigns = [
     type: "Emergency Relief",
     donationTypes: ["Money", "Clothes", "Food"],
     progress: 60,
-    urgent: true
-  }
+    urgent: true,
+  },
 ];
 
-const donationHistory = [
+const donationHistory1 = [
   {
     id: 1,
     title: "Clean Water Initiative for Remote Villages",
@@ -132,7 +140,7 @@ const donationHistory = [
     amount: 150,
     status: "Completed",
     reference: "CW20250115JS",
-    campaignId: 5
+    campaignId: 5,
   },
   {
     id: 2,
@@ -143,7 +151,7 @@ const donationHistory = [
     amount: 75,
     status: "Completed",
     reference: "WC20241228JS",
-    campaignId: 6
+    campaignId: 6,
   },
   {
     id: 3,
@@ -154,7 +162,7 @@ const donationHistory = [
     amount: 200,
     status: "Completed",
     reference: "MS20241210JS",
-    campaignId: 7
+    campaignId: 7,
   },
   {
     id: 4,
@@ -165,8 +173,8 @@ const donationHistory = [
     amount: 100,
     status: "Completed",
     reference: "FB20241122JS",
-    campaignId: 8
-  }
+    campaignId: 8,
+  },
 ];
 
 const DonationIcon = ({ type }) => {
@@ -181,16 +189,28 @@ const DonationIcon = ({ type }) => {
 
 export default function DonorDashboard() {
   const [activeTab, setActiveTab] = useState("personalized");
-  const navigate=useNavigate();
+  const navigate = useNavigate();
   const [selectedDonationTypes, setSelectedDonationTypes] = useState({});
   const { user } = useAuth();
+  const [donationHistory, setHistory] = useState([]);
 
   useEffect(() => {
-    console.log("user.type",user.type);
-    if(!user || user.type!="donor"){
+    console.log("user.type", user.type);
+    if (!user || user.type != "donor") {
       navigate("/donor-login");
     }
-  },[user]);
+
+    const fetchHistory = async () => {
+      try {
+        const result = await api.get(`/donations/user/${user.id}`);
+        setHistory(result.data.donations);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchHistory();
+  }, [user]);
 
   const [showEmergencyOnly, setShowEmergencyOnly] = useState(false);
   const [selectedReceipt, setSelectedReceipt] = useState(null);
@@ -201,7 +221,7 @@ export default function DonorDashboard() {
   const [preferencesForm, setPreferencesForm] = useState({
     preferredCauses: initialUserData.preferredCauses,
     donationRange: initialUserData.donationRange,
-    donationTypes: initialUserData.donationTypes
+    donationTypes: initialUserData.donationTypes,
   });
   const [newCause, setNewCause] = useState("");
   const [showCauseDropdown, setShowCauseDropdown] = useState(false);
@@ -224,9 +244,9 @@ export default function DonorDashboard() {
   };
 
   const handleProfileChange = (field, value) => {
-    setProfileForm(prev => ({
+    setProfileForm((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
@@ -235,15 +255,15 @@ export default function DonorDashboard() {
     setPreferencesForm({
       preferredCauses: userData.preferredCauses,
       donationRange: userData.donationRange,
-      donationTypes: userData.donationTypes
+      donationTypes: userData.donationTypes,
     });
     setIsEditingPreferences(true);
   };
 
   const handleSavePreferences = () => {
-    setUserData(prev => ({
+    setUserData((prev) => ({
       ...prev,
-      ...preferencesForm
+      ...preferencesForm,
     }));
     setIsEditingPreferences(false);
     // Here you would typically make an API call to save the preferences
@@ -253,16 +273,16 @@ export default function DonorDashboard() {
     setPreferencesForm({
       preferredCauses: userData.preferredCauses,
       donationRange: userData.donationRange,
-      donationTypes: userData.donationTypes
+      donationTypes: userData.donationTypes,
     });
     setIsEditingPreferences(false);
   };
 
   const handleAddCause = (cause) => {
     if (!preferencesForm.preferredCauses.includes(cause)) {
-      setPreferencesForm(prev => ({
+      setPreferencesForm((prev) => ({
         ...prev,
-        preferredCauses: [...prev.preferredCauses, cause]
+        preferredCauses: [...prev.preferredCauses, cause],
       }));
     }
     setNewCause("");
@@ -270,25 +290,27 @@ export default function DonorDashboard() {
   };
 
   const handleRemoveCause = (causeToRemove) => {
-    setPreferencesForm(prev => ({
+    setPreferencesForm((prev) => ({
       ...prev,
-      preferredCauses: prev.preferredCauses.filter(cause => cause !== causeToRemove)
+      preferredCauses: prev.preferredCauses.filter(
+        (cause) => cause !== causeToRemove
+      ),
     }));
   };
 
   const handleAddDonationType = (type) => {
     if (!preferencesForm.donationTypes.includes(type)) {
-      setPreferencesForm(prev => ({
+      setPreferencesForm((prev) => ({
         ...prev,
-        donationTypes: [...prev.donationTypes, type]
+        donationTypes: [...prev.donationTypes, type],
       }));
     }
   };
 
   const handleRemoveDonationType = (typeToRemove) => {
-    setPreferencesForm(prev => ({
+    setPreferencesForm((prev) => ({
       ...prev,
-      donationTypes: prev.donationTypes.filter(type => type !== typeToRemove)
+      donationTypes: prev.donationTypes.filter((type) => type !== typeToRemove),
     }));
   };
 
@@ -468,9 +490,9 @@ export default function DonorDashboard() {
   // Download individual receipt
   const downloadReceipt = (donation) => {
     const receiptContent = generateReceiptContent(donation);
-    const blob = new Blob([receiptContent], { type: 'text/html' });
+    const blob = new Blob([receiptContent], { type: "text/html" });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
     link.download = `donation-receipt-${donation.reference}.html`;
     document.body.appendChild(link);
@@ -492,7 +514,7 @@ export default function DonorDashboard() {
   // Print receipt
   const printReceipt = (donation) => {
     const receiptContent = generateReceiptContent(donation);
-    const printWindow = window.open('', '_blank');
+    const printWindow = window.open("", "_blank");
     printWindow.document.write(receiptContent);
     printWindow.document.close();
     printWindow.focus();
@@ -635,7 +657,9 @@ export default function DonorDashboard() {
               </tr>
             </thead>
             <tbody>
-              ${donationHistory.map(donation => `
+              ${donationHistory
+                .map(
+                  (donation) => `
                 <tr>
                   <td>${donation.date}</td>
                   <td>${donation.title}</td>
@@ -644,7 +668,9 @@ export default function DonorDashboard() {
                   <td>${donation.status}</td>
                   <td>${donation.reference}</td>
                 </tr>
-              `).join('')}
+              `
+                )
+                .join("")}
               <tr class="total-row">
                 <td colspan="3"><strong>Total</strong></td>
                 <td><strong>$${userData.totalDonated}</strong></td>
@@ -659,7 +685,7 @@ export default function DonorDashboard() {
           <table>
             <tr>
               <td><strong>Preferred Causes:</strong></td>
-              <td>${userData.preferredCauses.join(', ')}</td>
+              <td>${userData.preferredCauses.join(", ")}</td>
             </tr>
             <tr>
               <td><strong>Donation Range:</strong></td>
@@ -667,7 +693,7 @@ export default function DonorDashboard() {
             </tr>
             <tr>
               <td><strong>Donation Types:</strong></td>
-              <td>${userData.donationTypes.join(', ')}</td>
+              <td>${userData.donationTypes.join(", ")}</td>
             </tr>
           </table>
         </div>
@@ -682,11 +708,13 @@ export default function DonorDashboard() {
       </html>
     `;
 
-    const blob = new Blob([reportContent], { type: 'text/html' });
+    const blob = new Blob([reportContent], { type: "text/html" });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
-    link.download = `donation-report-${userData.name.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.html`;
+    link.download = `donation-report-${userData.name.replace(/\s+/g, "-")}-${
+      new Date().toISOString().split("T")[0]
+    }.html`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -694,8 +722,8 @@ export default function DonorDashboard() {
   };
 
   // Filter campaigns based on emergency filter
-  const filteredCampaigns = showEmergencyOnly 
-    ? campaigns.filter(campaign => campaign.urgent)
+  const filteredCampaigns = showEmergencyOnly
+    ? campaigns.filter((campaign) => campaign.urgent)
     : campaigns;
 
   const renderPersonalizedFeed = () => (
@@ -708,7 +736,8 @@ export default function DonorDashboard() {
               Urgent: Emergency Campaigns Need Support
             </h3>
             <p className="text-red-600 text-sm mt-1">
-              {campaigns.filter(camp => camp.urgent).length} emergency campaigns matching your preferences require immediate assistance.
+              {campaigns.filter((camp) => camp.urgent).length} emergency
+              campaigns matching your preferences require immediate assistance.
             </p>
           </div>
           {showEmergencyOnly ? (
@@ -763,16 +792,19 @@ export default function DonorDashboard() {
             </span>
           )}
         </div>
-        
+
         {filteredCampaigns.length === 0 ? (
           <div className="bg-white rounded-lg shadow-md border border-gray-200 p-8 text-center">
             <div className="max-w-md mx-auto">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Package className="h-8 w-8 text-gray-400" />
               </div>
-              <h4 className="text-lg font-semibold text-gray-800 mb-2">No Emergency Campaigns Available</h4>
+              <h4 className="text-lg font-semibold text-gray-800 mb-2">
+                No Emergency Campaigns Available
+              </h4>
               <p className="text-gray-600 mb-4">
-                There are currently no emergency campaigns that match your preferences.
+                There are currently no emergency campaigns that match your
+                preferences.
               </p>
               <button
                 onClick={handleShowAllCampaigns}
@@ -785,10 +817,14 @@ export default function DonorDashboard() {
         ) : (
           <div className="space-y-6">
             {filteredCampaigns.map((campaign) => {
-              const selectedType = selectedDonationTypes[campaign.id] || campaign.donationTypes[0];
-              
+              const selectedType =
+                selectedDonationTypes[campaign.id] || campaign.donationTypes[0];
+
               return (
-                <div key={campaign.id} className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+                <div
+                  key={campaign.id}
+                  className="bg-white rounded-lg shadow-md border border-gray-200 p-6"
+                >
                   {/* Campaign Header */}
                   <div className="flex items-start justify-between mb-4">
                     <div>
@@ -802,10 +838,17 @@ export default function DonorDashboard() {
                           {campaign.type}
                         </span>
                       </div>
-                      <h4 className="text-xl font-semibold text-gray-800">{campaign.title}</h4>
-                      <p className="text-gray-600 mt-1">{campaign.description}</p>
+                      <h4 className="text-xl font-semibold text-gray-800">
+                        {campaign.title}
+                      </h4>
+                      <p className="text-gray-600 mt-1">
+                        {campaign.description}
+                      </p>
                       <p className="text-sm text-gray-500 mt-2">
-                        by <span className="font-medium text-gray-700">{campaign.organization}</span>
+                        by{" "}
+                        <span className="font-medium text-gray-700">
+                          {campaign.organization}
+                        </span>
                       </p>
                     </div>
                   </div>
@@ -814,11 +857,15 @@ export default function DonorDashboard() {
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
-                        <span className="font-semibold">${campaign.raised.toLocaleString()} raised</span>
-                        <span className="text-gray-600">Goal: ${campaign.goal.toLocaleString()}</span>
+                        <span className="font-semibold">
+                          ${campaign.raised.toLocaleString()} raised
+                        </span>
+                        <span className="text-gray-600">
+                          Goal: ${campaign.goal.toLocaleString()}
+                        </span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
+                        <div
                           className="bg-rose-500 h-2 rounded-full transition-all duration-500"
                           style={{ width: `${campaign.progress}%` }}
                         ></div>
@@ -837,12 +884,16 @@ export default function DonorDashboard() {
 
                     {/* Donation Types */}
                     <div>
-                      <p className="text-sm font-medium text-gray-700 mb-2">Choose donation type:</p>
+                      <p className="text-sm font-medium text-gray-700 mb-2">
+                        Choose donation type:
+                      </p>
                       <div className="flex flex-wrap gap-2">
                         {campaign.donationTypes.map((type) => (
                           <button
                             key={type}
-                            onClick={() => handleDonationTypeClick(campaign.id, type)}
+                            onClick={() =>
+                              handleDonationTypeClick(campaign.id, type)
+                            }
                             className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm transition-colors ${
                               selectedType === type
                                 ? "bg-rose-100 text-rose-700 border border-rose-300"
@@ -858,7 +909,9 @@ export default function DonorDashboard() {
 
                     {/* Donate Button */}
                     <Link
-                      to={`/donation-confirmation/${campaign.id}/${selectedType.toLowerCase()}`}
+                      to={`/donation-confirmation/${
+                        campaign.id
+                      }/${selectedType.toLowerCase()}`}
                       className={`block text-center w-full py-3 rounded-lg font-medium transition-colors ${
                         campaign.urgent
                           ? "bg-red-600 text-white hover:bg-red-700"
@@ -880,8 +933,10 @@ export default function DonorDashboard() {
   const renderDonationHistory = () => (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold text-gray-800">Your Donation History</h3>
-        <button 
+        <h3 className="text-lg font-semibold text-gray-800">
+          Your Donation History
+        </h3>
+        <button
           onClick={downloadDonationReport}
           className="flex items-center gap-2 text-rose-600 hover:text-rose-700 transition-colors"
         >
@@ -899,10 +954,10 @@ export default function DonorDashboard() {
             <div className="flex justify-between items-start">
               <div className="flex-1">
                 <h4 className="font-semibold text-gray-800">
-                  {donation.title}
+                  {donation.campaign_name}
                 </h4>
                 <p className="text-gray-600 text-sm mt-1">
-                  {donation.description}
+                  {donation.campaign_desc}
                 </p>
                 <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
                   <span className="flex items-center gap-1">
@@ -916,11 +971,13 @@ export default function DonorDashboard() {
                   <span className="bg-green-100 text-green-700 px-2 py-1 rounded-full">
                     {donation.status}
                   </span>
-                  <span className="text-gray-400">Ref: {donation.reference}</span>
+                  
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-lg font-bold text-rose-600">${donation.amount}</p>
+                <p className="text-lg font-bold text-rose-600">
+                  ${donation.amount}
+                </p>
                 <div className="flex gap-2 mt-2">
                   <button
                     onClick={() => viewReceipt(donation)}
@@ -950,9 +1007,11 @@ export default function DonorDashboard() {
       {/* Profile Information */}
       <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
         <div className="flex justify-between items-start mb-4">
-          <h3 className="text-lg font-semibold text-gray-800">Profile Information</h3>
+          <h3 className="text-lg font-semibold text-gray-800">
+            Profile Information
+          </h3>
           {!isEditingProfile ? (
-            <button 
+            <button
               onClick={handleEditProfile}
               className="flex items-center gap-2 text-rose-600 hover:text-rose-700 transition-colors"
             >
@@ -961,14 +1020,14 @@ export default function DonorDashboard() {
             </button>
           ) : (
             <div className="flex gap-2">
-              <button 
+              <button
                 onClick={handleSaveProfile}
                 className="flex items-center gap-2 bg-rose-500 text-white px-3 py-1 rounded-lg hover:bg-rose-600 transition-colors text-sm"
               >
                 <Save className="h-3 w-3" />
                 Save
               </button>
-              <button 
+              <button
                 onClick={handleCancelEditProfile}
                 className="flex items-center gap-2 bg-gray-500 text-white px-3 py-1 rounded-lg hover:bg-gray-600 transition-colors text-sm"
               >
@@ -994,37 +1053,45 @@ export default function DonorDashboard() {
         ) : (
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Full Name
+              </label>
               <input
                 type="text"
                 value={profileForm.name}
-                onChange={(e) => handleProfileChange('name', e.target.value)}
+                onChange={(e) => handleProfileChange("name", e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-300 focus:border-rose-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email
+              </label>
               <input
                 type="email"
                 value={profileForm.email}
-                onChange={(e) => handleProfileChange('email', e.target.value)}
+                onChange={(e) => handleProfileChange("email", e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-300 focus:border-rose-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Phone
+              </label>
               <input
                 type="tel"
                 value={profileForm.phone}
-                onChange={(e) => handleProfileChange('phone', e.target.value)}
+                onChange={(e) => handleProfileChange("phone", e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-300 focus:border-rose-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Address
+              </label>
               <textarea
                 value={profileForm.address}
-                onChange={(e) => handleProfileChange('address', e.target.value)}
+                onChange={(e) => handleProfileChange("address", e.target.value)}
                 rows={3}
                 className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-300 focus:border-rose-500"
               />
@@ -1036,9 +1103,11 @@ export default function DonorDashboard() {
       {/* Donation Preferences */}
       <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
         <div className="flex justify-between items-start mb-4">
-          <h3 className="text-lg font-semibold text-gray-800">Donation Preferences</h3>
+          <h3 className="text-lg font-semibold text-gray-800">
+            Donation Preferences
+          </h3>
           {!isEditingPreferences ? (
-            <button 
+            <button
               onClick={handleEditPreferences}
               className="flex items-center gap-2 text-rose-600 hover:text-rose-700 transition-colors"
             >
@@ -1047,14 +1116,14 @@ export default function DonorDashboard() {
             </button>
           ) : (
             <div className="flex gap-2">
-              <button 
+              <button
                 onClick={handleSavePreferences}
                 className="flex items-center gap-2 bg-rose-500 text-white px-3 py-1 rounded-lg hover:bg-rose-600 transition-colors text-sm"
               >
                 <Save className="h-3 w-3" />
                 Save
               </button>
-              <button 
+              <button
                 onClick={handleCancelEditPreferences}
                 className="flex items-center gap-2 bg-gray-500 text-white px-3 py-1 rounded-lg hover:bg-gray-600 transition-colors text-sm"
               >
@@ -1064,11 +1133,13 @@ export default function DonorDashboard() {
             </div>
           )}
         </div>
-        
+
         {!isEditingPreferences ? (
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Preferred Causes</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Preferred Causes
+              </label>
               <div className="flex flex-wrap gap-2">
                 {userData.preferredCauses.map((cause, index) => (
                   <span
@@ -1082,12 +1153,18 @@ export default function DonorDashboard() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Donation Range</label>
-              <p className="text-gray-800 font-medium">{userData.donationRange} per donation</p>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Donation Range
+              </label>
+              <p className="text-gray-800 font-medium">
+                {userData.donationRange} per donation
+              </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Donation Types</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Donation Types
+              </label>
               <div className="flex flex-wrap gap-2">
                 {userData.donationTypes.map((type) => (
                   <span
@@ -1104,7 +1181,9 @@ export default function DonorDashboard() {
         ) : (
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Preferred Causes</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Preferred Causes
+              </label>
               <div className="flex flex-wrap gap-2 mb-3">
                 {preferencesForm.preferredCauses.map((cause) => (
                   <span
@@ -1138,11 +1217,14 @@ export default function DonorDashboard() {
                     <Plus className="h-4 w-4" />
                   </button>
                 </div>
-                
+
                 {showCauseDropdown && (
                   <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
                     {availableCauses
-                      .filter(cause => !preferencesForm.preferredCauses.includes(cause))
+                      .filter(
+                        (cause) =>
+                          !preferencesForm.preferredCauses.includes(cause)
+                      )
                       .map((cause) => (
                         <button
                           key={cause}
@@ -1158,20 +1240,31 @@ export default function DonorDashboard() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Donation Range</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Donation Range
+              </label>
               <select
                 value={preferencesForm.donationRange}
-                onChange={(e) => setPreferencesForm(prev => ({ ...prev, donationRange: e.target.value }))}
+                onChange={(e) =>
+                  setPreferencesForm((prev) => ({
+                    ...prev,
+                    donationRange: e.target.value,
+                  }))
+                }
                 className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-300 focus:border-rose-500"
               >
-                {donationRanges.map(range => (
-                  <option key={range} value={range}>{range}</option>
+                {donationRanges.map((range) => (
+                  <option key={range} value={range}>
+                    {range}
+                  </option>
                 ))}
               </select>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Donation Types</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Donation Types
+              </label>
               <div className="space-y-2">
                 <div className="flex flex-wrap gap-2 mb-3">
                   {preferencesForm.donationTypes.map((type) => (
@@ -1192,7 +1285,9 @@ export default function DonorDashboard() {
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {availableDonationTypes
-                    .filter(type => !preferencesForm.donationTypes.includes(type))
+                    .filter(
+                      (type) => !preferencesForm.donationTypes.includes(type)
+                    )
                     .map((type) => (
                       <button
                         key={type}
@@ -1215,8 +1310,6 @@ export default function DonorDashboard() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br  from-yellow-100 via-teal-500 via-rose-300 to-rose-500">
-    
-
       {/* Receipt Modal */}
       {selectedReceipt && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -1247,9 +1340,11 @@ export default function DonorDashboard() {
                   </button>
                 </div>
               </div>
-              <div 
+              <div
                 className="receipt-content border rounded-lg p-4"
-                dangerouslySetInnerHTML={{ __html: generateReceiptContent(selectedReceipt) }}
+                dangerouslySetInnerHTML={{
+                  __html: generateReceiptContent(selectedReceipt),
+                }}
               />
             </div>
           </div>
