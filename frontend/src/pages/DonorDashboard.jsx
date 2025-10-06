@@ -972,7 +972,7 @@ export default function DonorDashboard() {
                 <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
                   <span className="flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
-                    {donation.date}
+                    {donation.date.substring(0, 10)}
                   </span>
                   <span className="flex items-center gap-1">
                     <DonationIcon type={donation.type} />

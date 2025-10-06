@@ -366,3 +366,92 @@ export const deleteCampaign = async (req, res) => {
   }
 };
 
+
+
+// @desc    Update a specific campaign
+// @route   PUT /api/campaigns/:id
+// @access  Private (NGO only)
+export const updateCampaign = async (req, res) => {
+    const { id } = req.params;
+    const {
+        title,
+        description,
+        goal,
+        category,
+        location,
+        endDate,
+        is_emergency,
+        label_right,
+    } = req.body;
+
+    // 1️⃣ Basic Validation
+    if (!title || !description || !goal || !category || !location || !endDate) {
+        return res.status(400).json({ message: 'Please fill all required fields.' });
+    }
+
+    // 2️⃣ Prepare Data
+    const isEmergencyInt = is_emergency ? 1 : 0;
+
+    // Format date to MySQL 'YYYY-MM-DD'
+    let formattedEndDate;
+    try {
+        formattedEndDate = new Date(endDate).toISOString().split('T')[0];
+    } catch (err) {
+        return res.status(400).json({ message: 'Invalid date format.' });
+    }
+
+    // 3️⃣ SQL Query
+    const sql = `
+        UPDATE Campaigns
+        SET 
+            title = ?,
+            description = ?,
+            fundraising_goal = ?,
+            category = ?,
+            location = ?,
+            end_date = ?,
+            emergency = ?,
+            tag = ?
+        WHERE
+            campaign_id = ?
+    `;
+
+    // 4️⃣ Values Array
+    const values = [
+        title,
+        description,
+        parseFloat(goal),
+        category,
+        location,
+        formattedEndDate,
+        isEmergencyInt,
+        label_right,
+        id
+    ];
+
+    try {
+        const [result] = await pool.query(sql, values);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Campaign not found or not authorized to update.' });
+        }
+
+        res.status(200).json({
+            message: 'Campaign updated successfully',
+            updatedFields: {
+                title,
+                description,
+                goal,
+                category,
+                location,
+                endDate: formattedEndDate,
+                is_emergency: isEmergencyInt,
+                label_right,
+            },
+        });
+
+    } catch (error) {
+        console.error('MySQL Update Error:', error);
+        res.status(500).json({ message: 'Database error during campaign update.', error });
+    }
+};

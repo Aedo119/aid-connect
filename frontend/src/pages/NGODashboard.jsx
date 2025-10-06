@@ -514,7 +514,7 @@ export default function NGODashboard() {
                           <div className="flex justify-between text-sm text-gray-600 mb-1">
                             <span>Progress</span>
                             <span>
-                              {campaign.raised_amount / campaign.goal_amount}%
+                              {(campaign.raised_amount / campaign.goal_amount)*100}%
                             </span>
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-2">
@@ -522,7 +522,7 @@ export default function NGODashboard() {
                               className="h-2 rounded-full bg-rose-500"
                               style={{
                                 width: `${
-                                  campaign.raised_amount / campaign.goal_amount
+                                  (campaign.raised_amount / campaign.goal_amount)*100
                                 }%`,
                               }}
                             ></div>
@@ -578,7 +578,7 @@ export default function NGODashboard() {
                             {donation.donor_name}
                           </span>
                           <span className="text-sm text-gray-500">
-                            {donation.date}
+                            {donation.date.substring(0, 10)}
                           </span>
                         </div>
                         <div className="flex justify-between items-center">
