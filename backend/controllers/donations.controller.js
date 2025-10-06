@@ -364,3 +364,51 @@ export const getUserDonationHistory = async (req, res) => {
   }
 };
 
+// controllers/donations.controller.js
+export const getUserImpact = async (req, res) => {
+  const { user_id } = req.params;
+
+  try {
+    // Get unique campaigns across all donation tables
+    const [campaignsResult] = await pool.query(
+      `
+      SELECT COUNT(DISTINCT campaign_id) AS totalCampaigns FROM (
+        SELECT campaign_id FROM MoneyDonations WHERE donor_id = ?
+        UNION
+        SELECT campaign_id FROM FoodDonations WHERE donor_id = ?
+        UNION
+        SELECT campaign_id FROM ClothingDonations WHERE donor_id = ?
+        UNION
+        SELECT campaign_id FROM MedicalDonations WHERE donor_id = ?
+      ) AS all_campaigns
+      `,
+      [user_id, user_id, user_id, user_id]
+    );
+
+    const totalCampaigns = campaignsResult[0].totalCampaigns || 0;
+
+    // Total amount donated (MoneyDonations only)
+    const [totalAmountResult] = await pool.query(
+      `SELECT SUM(amount) AS totalAmount
+       FROM MoneyDonations
+       WHERE donor_id = ?`,
+      [user_id]
+    );
+
+    const totalAmount = totalAmountResult[0].totalAmount || 0;
+
+    // Simple impact score formula
+    const impactScore = Math.round((totalAmount * totalCampaigns) / 1000);
+
+    res.status(200).json({
+      totalCampaigns,
+      totalAmount,
+      impactScore,
+    });
+  } catch (error) {
+    console.error("❌ Error fetching user impact:", error);
+    res.status(500).json({ error: "Failed to fetch user impact" });
+  }
+};
+
+

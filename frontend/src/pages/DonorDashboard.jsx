@@ -193,12 +193,21 @@ export default function DonorDashboard() {
   const [selectedDonationTypes, setSelectedDonationTypes] = useState({});
   const { user } = useAuth();
   const [donationHistory, setHistory] = useState([]);
+  const [summary, setSummary] = useState([]);
 
   useEffect(() => {
     console.log("user.type", user.type);
     if (!user || user.type != "donor") {
       navigate("/donor-login");
     }
+    const fetchSummary = async () => {
+      try {
+        const result = await api.get(`/donations/impact/${user.id}`);
+        setSummary(result.data);
+      } catch (err) {
+        console.log(err);
+      }
+    };
 
     const fetchHistory = async () => {
       try {
@@ -210,6 +219,7 @@ export default function DonorDashboard() {
     };
 
     fetchHistory();
+    fetchSummary();
   }, [user]);
 
   const [showEmergencyOnly, setShowEmergencyOnly] = useState(false);
@@ -623,21 +633,21 @@ export default function DonorDashboard() {
           <div class="logo">AidConnect</div>
           <h1 class="report-title">DONATION REPORT</h1>
           <div>Generated on: ${new Date().toLocaleDateString()}</div>
-          <div>Donor: ${userData.name} (${userData.email})</div>
+          <div>Donor: ${user.name} (${user.email})</div>
         </div>
 
         <div class="summary">
           <div class="summary-grid">
             <div class="summary-item">
-              <div class="summary-value">$${userData.totalDonated}</div>
+              <div class="summary-value">$${summary.totalAmount}</div>
               <div class="summary-label">Total Donated</div>
             </div>
             <div class="summary-item">
-              <div class="summary-value">${userData.campaignsSupported}</div>
+              <div class="summary-value">${summary.totalCampaigns}</div>
               <div class="summary-label">Campaigns Supported</div>
             </div>
             <div class="summary-item">
-              <div class="summary-value">${userData.impactScore}%</div>
+              <div class="summary-value">${summary.impactScore}%</div>
               <div class="summary-label">Impact Score</div>
             </div>
           </div>
@@ -971,13 +981,15 @@ export default function DonorDashboard() {
                   <span className="bg-green-100 text-green-700 px-2 py-1 rounded-full">
                     {donation.status}
                   </span>
-                  
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-lg font-bold text-rose-600">
-                  ${donation.amount}
-                </p>
+                {donation.amount && (
+                  <p className="text-lg font-bold text-rose-600">
+                    ${donation.amount}
+                  </p>
+                )}
+
                 <div className="flex gap-2 mt-2">
                   <button
                     onClick={() => viewReceipt(donation)}
@@ -1366,7 +1378,7 @@ export default function DonorDashboard() {
                     </h3>
                   </div>
                   <p className="text-3xl font-bold text-rose-600">
-                    ${userData.totalDonated}
+                    ${summary.totalAmount}
                   </p>
                 </div>
 
@@ -1379,7 +1391,7 @@ export default function DonorDashboard() {
                       </h4>
                     </div>
                     <p className="text-xl font-bold text-gray-800">
-                      {userData.campaignsSupported}
+                      {summary.totalCampaigns}
                     </p>
                   </div>
 
@@ -1391,7 +1403,7 @@ export default function DonorDashboard() {
                       </h4>
                     </div>
                     <p className="text-xl font-bold text-gray-800">
-                      {userData.impactScore}%
+                      {summary.impactScore}%
                     </p>
                   </div>
                 </div>
