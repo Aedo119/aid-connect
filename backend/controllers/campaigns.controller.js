@@ -1,5 +1,22 @@
 import { pool } from "../server.js";
 
+import crypto from "crypto";
+
+const IV_LENGTH = 16;
+
+
+function decrypt(encryptedText) {
+  if (!encryptedText) return null;
+  const ENCRYPTION_KEY = Buffer.from(process.env.ENCRYPTION_KEY, "hex");
+  const textParts = encryptedText.split(":");
+  const iv = Buffer.from(textParts.shift(), "hex");
+  const encryptedData = textParts.join(":");
+  const decipher = crypto.createDecipheriv("aes-256-cbc", ENCRYPTION_KEY, iv);
+  let decrypted = decipher.update(encryptedData, "hex", "utf8");
+  decrypted += decipher.final("utf8");
+  return decrypted;
+}
+
 export const createCampaign = async (req, res) => {
   try {
     const {
@@ -109,11 +126,13 @@ export const getCampaigns = async (req, res) => {
         c.description,
         c.fundraising_goal AS goal_amount,
         c.start_date,
+        c.raised_amount,
         c.end_date,
         c.status,
         c.category,
         c.location,
         c.emergency,
+        c.donors,
         c.tag,
         c.image_url AS image,
         o.name AS organization_name
@@ -148,6 +167,7 @@ export const getCampaigns = async (req, res) => {
 
     const campaignsWithDonations = campaigns.map(c => ({
       ...c,
+      organization_name: decrypt(c.organization_name),
       donationTypes: donationMap[c.campaign_id] || []
     }));
 
@@ -204,6 +224,8 @@ export const getCampaignsByOrg = async (req, res) => {
       });
     }
 
+
+
     // Fetch donation types for campaigns
     const campaignIds = campaigns.map(c => c.campaign_id);
     const [donationRows] = await pool.query(
@@ -224,6 +246,7 @@ export const getCampaignsByOrg = async (req, res) => {
 
     const campaignsWithDonations = campaigns.map(c => ({
       ...c,
+      organization_name: decrypt(c.organization_name),
       donationTypes: donationMap[c.campaign_id] || []
     }));
 
@@ -231,6 +254,8 @@ export const getCampaignsByOrg = async (req, res) => {
     const total_active_campaigns = campaigns.filter(c => c.status === 'Active').length;
     const total_raised = campaigns.reduce((sum, c) => sum + (c.raised_amount || 0), 0);
     const total_donors = campaigns.reduce((sum, c) => sum + (c.donors || 0), 0);
+
+    
 
     res.status(200).json({
       message: "Campaigns fetched successfully",
@@ -244,3 +269,61 @@ export const getCampaignsByOrg = async (req, res) => {
   }
 };
 
+export const getCampaignById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // 1️⃣ Fetch campaign with organization info
+    const query = `
+      SELECT 
+        c.campaign_id,
+        c.title,
+        c.description,
+        c.fundraising_goal AS goal_amount,
+        c.raised_amount,
+        c.start_date,
+        c.end_date,
+        c.status,
+        c.category,
+        c.location,
+        c.emergency,
+        c.tag,
+        c.image_url AS image,
+        o.name AS organization_name
+      FROM Campaigns c
+      JOIN Organizations o ON c.organization_id = o.organization_id
+      WHERE c.campaign_id = ?
+    `;
+
+    const [campaignRows] = await pool.query(query, [id]);
+
+    if (campaignRows.length === 0) {
+      return res.status(404).json({ message: "Campaign not found" });
+    }
+
+    const campaign = campaignRows[0];
+
+    // 2️⃣ Fetch donation types for this campaign
+    const [donationRows] = await pool.query(
+      `
+      SELECT dt.name AS donation_type
+      FROM CampaignDonationTypes cdt
+      JOIN DonationTypes dt ON cdt.donation_type_id = dt.donation_type_id
+      WHERE cdt.campaign_id = ?
+      `,
+      [id]
+    );
+
+    const donationTypes = donationRows.map(row => row.donation_type);
+
+    // 3️⃣ Return campaign with donation types
+    res.status(200).json({
+      message: "Campaign fetched successfully",
+      campaign: { ...campaign, donationTypes },
+    });
+
+  } catch (err) {
+    console.error("Error fetching campaign by ID:", err);
+    res.status(500).json({ message: "Internal server error", error: err.message });
+  }
+};

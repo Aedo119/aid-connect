@@ -186,10 +186,12 @@ export default function DonorDashboard() {
   const { user } = useAuth();
 
   useEffect(() => {
-    // if(!user || user.type!="donor"){
-    //   navigate("/donor-login");
-    // }
+    console.log("user.type",user.type);
+    if(!user || user.type!="donor"){
+      navigate("/donor-login");
+    }
   },[user]);
+
   const [showEmergencyOnly, setShowEmergencyOnly] = useState(false);
   const [selectedReceipt, setSelectedReceipt] = useState(null);
   const [userData, setUserData] = useState(initialUserData);
@@ -980,10 +982,10 @@ export default function DonorDashboard() {
         {!isEditingProfile ? (
           <div className="space-y-3">
             <div>
-              <p className="font-medium text-gray-800">{userData.name}</p>
-              <p className="text-gray-600 text-sm">{userData.email}</p>
-              <p className="text-gray-600 text-sm">{userData.phone}</p>
-              <p className="text-gray-600 text-sm">{userData.address}</p>
+              <p className="font-medium text-gray-800">{user.name}</p>
+              <p className="text-gray-600 text-sm">{user.email}</p>
+              <p className="text-gray-600 text-sm">{user.phoneNumber}</p>
+              <p className="text-gray-600 text-sm">{user.address}</p>
             </div>
             <button className="text-rose-600 hover:text-rose-700 text-sm font-medium">
               Contact Owner
@@ -1213,23 +1215,7 @@ export default function DonorDashboard() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br  from-yellow-100 via-teal-500 via-rose-300 to-rose-500">
-      {/* Header */}
-      <div >
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-800">Welcome back, {userData.name}!</h1>
-              <p className="text-gray-600 mt-1">Continue making a difference with your generous support</p>
-            </div>
-            <div className="flex items-center gap-4">
-              <Bell className="h-6 w-6 text-white cursor-pointer hover:text-gray-600" />
-              <div className="w-8 h-8 bg-rose-500 rounded-full flex items-center justify-center text-white font-semibold">
-                {userData.name.charAt(0)}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+    
 
       {/* Receipt Modal */}
       {selectedReceipt && (

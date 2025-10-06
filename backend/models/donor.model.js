@@ -76,7 +76,7 @@ export const getProfileDetails = async (email) => {
       name: decrypt(donor.first_name),
       email: email,
       phoneNumber: decrypt(donor.phone_number),
-      address: decrypt(donor.address),
+      address: decrypt(donor.address_line1),
       postalCode: decrypt(donor.postal_code),
     };
 

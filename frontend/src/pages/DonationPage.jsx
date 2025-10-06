@@ -1,11 +1,15 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { campaigns } from "../data/campaigns";
+import { useLocation } from "react-router-dom";
 
 export default function DonationPage() {
+  const location = useLocation();
   const { id } = useParams();
   const navigate = useNavigate();
-  const campaign = campaigns.find((c) => c.id === parseInt(id));
+  console.log(location.state);
+  const { campaign } = location.state || {};
+  console.log(campaign);
   const [selectedTab, setSelectedTab] = useState("story");
   const [donationType, setDonationType] = useState(
     campaign?.donationTypes?.[0].toLowerCase() || "money"
@@ -15,11 +19,14 @@ export default function DonationPage() {
     return <p className="text-center mt-10 text-red-500">Campaign not found</p>;
   }
 
-  const raisedPercent = Math.min((campaign.raised / campaign.goal) * 100, 100);
+  const raisedPercent = Math.min(
+    (campaign.raised_amount / campaign.goal_amount) * 100,
+    100
+  );
 
   const handleDonateClick = () => {
     // Navigate to the donation confirmation page with the selected type
-    navigate(`/donation-confirmation/${campaign.id}/${donationType}`);
+    navigate(`/donation-confirmation/${campaign.campaign_id}/${donationType}`);
   };
 
   return (
@@ -34,9 +41,9 @@ export default function DonationPage() {
 
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-2xl font-bold">{campaign.title}</h1>
-          {campaign.labelRight && (
+          {campaign.tag && (
             <span className="text-xs bg-yellow-400 text-white px-3 py-1 rounded-full font-semibold">
-              {campaign.labelRight}
+              {campaign.tag}
             </span>
           )}
         </div>
@@ -57,11 +64,17 @@ export default function DonationPage() {
                 d="M8 7V3m8 4V3m-9 8h10m-5 5v5"
               ></path>
             </svg>
-            <span>{Number(campaign.daysLeft)} days left</span>
+            <span>
+              {Math.floor(
+                (new Date(campaign.end_date) - new Date(campaign.start_date)) /
+                  (1000 * 60 * 60 * 24)
+              )}{" "}
+              days left
+            </span>
           </div>
         </div>
 
-        <p className="text-gray-700 mb-4">{campaign.desc}</p>
+        <p className="text-gray-700 mb-4">{campaign.description}</p>
 
         {/* Tabs */}
         <div className="border-b border-gray-200 mb-6">
@@ -83,57 +96,68 @@ export default function DonationPage() {
         </div>
 
         <div className="text-gray-700 text-sm space-y-3">
-          {selectedTab === "story" && (
-            <p>
-              {campaign.labelRight === "Emergency Relief"
-                ? `The earthquake has displaced over 15,000 people, with many losing their homes and livelihoods entirely. The mountainous terrain has made rescue and relief efforts extremely challenging, with several villages completely cut off from main roads.
-
-Our emergency response team has been on the ground since day one, working with local partners to identify the families most in need. We are focusing our efforts on:
-
-• Providing emergency food packages containing rice, lentils, cooking oil, and other essential items
-• Delivering clean drinking water to areas where water sources have been contaminated
-• Setting up temporary shelters for families who have lost their homes
-• Providing medical assistance to those injured in the disaster
-
-Every donation, no matter the size, makes a direct impact on the lives of earthquake survivors. With your support, we can ensure that no family goes hungry during this critical time.`
-                : campaign.desc}
-            </p>
-          )}
+          {selectedTab === "story" && <p>{campaign.description}</p>}
           {selectedTab === "updates" && <p>No updates yet.</p>}
           {selectedTab === "donors" && (
-            <div>
-              <h3 className="font-semibold text-lg mb-4">Recent Donors</h3>
-              <ul className="space-y-4">
-                {[
-                  { name: "Sarah M.", date: "1/20/2025", amount: 150, type: "Money" },
-                  { name: "Anonymous", date: "1/19/2025", amount: 75, type: "Money" },
-                  { name: "Michael C.", date: "1/18/2025", amount: 200, type: "Money" },
-                  { name: "Emily R.", date: "1/17/2025", amount: 100, type: "Money" },
-                  { name: "David L.", date: "1/16/2025", amount: 50, type: "Money" },
-                ].map((donor, index) => (
-                  <li
-                    key={index}
-                    className="flex justify-between items-center border-b border-gray-200 pb-2"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center font-bold text-gray-700">
-                        {donor.name.charAt(0)}
-                      </div>
-                      <div>
-                        <p className="font-medium">{donor.name}</p>
-                        <p className="text-xs text-gray-500">{donor.date}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold">${donor.amount}</span>
-                      <span className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded">
-                        {donor.type}
-                      </span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <div></div>
+            // <div>
+            //   <h3 className="font-semibold text-lg mb-4">Recent Donors</h3>
+            //   <ul className="space-y-4">
+            //     {[
+            //       {
+            //         name: "Sarah M.",
+            //         date: "1/20/2025",
+            //         amount: 150,
+            //         type: "Money",
+            //       },
+            //       {
+            //         name: "Anonymous",
+            //         date: "1/19/2025",
+            //         amount: 75,
+            //         type: "Money",
+            //       },
+            //       {
+            //         name: "Michael C.",
+            //         date: "1/18/2025",
+            //         amount: 200,
+            //         type: "Money",
+            //       },
+            //       {
+            //         name: "Emily R.",
+            //         date: "1/17/2025",
+            //         amount: 100,
+            //         type: "Money",
+            //       },
+            //       {
+            //         name: "David L.",
+            //         date: "1/16/2025",
+            //         amount: 50,
+            //         type: "Money",
+            //       },
+            //     ].map((donor, index) => (
+            //       <li
+            //         key={index}
+            //         className="flex justify-between items-center border-b border-gray-200 pb-2"
+            //       >
+            //         <div className="flex items-center gap-3">
+            //           <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center font-bold text-gray-700">
+            //             {donor.name.charAt(0)}
+            //           </div>
+            //           <div>
+            //             <p className="font-medium">{donor.name}</p>
+            //             <p className="text-xs text-gray-500">{donor.date}</p>
+            //           </div>
+            //         </div>
+            //         <div className="flex items-center gap-2">
+            //           <span className="font-bold">${donor.amount}</span>
+            //           <span className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded">
+            //             {donor.type}
+            //           </span>
+            //         </div>
+            //       </li>
+            //     ))}
+            //   </ul>
+            // </div>
           )}
         </div>
       </div>
@@ -143,7 +167,7 @@ Every donation, no matter the size, makes a direct impact on the lives of earthq
         {/* Donation progress */}
         <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
           <p className="text-sm font-semibold mb-2">
-            ${campaign.raised.toLocaleString()} raised
+            ${campaign.raised_amount} raised
           </p>
           <div className="w-full bg-gray-200 rounded-full h-3 mb-2 overflow-hidden">
             <div
@@ -152,9 +176,9 @@ Every donation, no matter the size, makes a direct impact on the lives of earthq
             ></div>
           </div>
           <p className="text-xs text-gray-500 mb-4">
-            Goal: ${campaign.goal.toLocaleString()} <br />
+            Goal: ${campaign.goal_amount} <br />
             <span className="font-bold">
-              ${Math.max(campaign.goal - campaign.raised, 0).toLocaleString()} to
+              ${Math.max(campaign.goal_amount - campaign.raised_amount, 0)} to
               go
             </span>
           </p>
@@ -164,8 +188,11 @@ Every donation, no matter the size, makes a direct impact on the lives of earthq
               <p className="text-xs text-gray-500">Donors</p>
             </div>
             <div>
-              <p className="font-bold text-lg">{campaign.daysLeft}</p>
-              <p className="text-xs text-gray-500">Days Left</p>
+              {Math.floor(
+                (new Date(campaign.end_date) - new Date(campaign.start_date)) /
+                  (1000 * 60 * 60 * 24)
+              )}{" "}
+              Days Left
             </div>
           </div>
 
@@ -188,7 +215,7 @@ Every donation, no matter the size, makes a direct impact on the lives of earthq
             </div>
           </div>
 
-          <button 
+          <button
             onClick={handleDonateClick}
             className="w-full bg-red-600 text-white py-3 rounded font-semibold hover:bg-red-700 transition relative"
           >
@@ -199,7 +226,7 @@ Every donation, no matter the size, makes a direct impact on the lives of earthq
         {/* Organization Card */}
         <div className="bg-white rounded-lg shadow p-4 border border-gray-200 flex items-center space-x-4">
           <div className="w-14 h-14 rounded-md bg-gray-200 flex items-center justify-center text-gray-400 font-bold text-xl">
-            {campaign.org.charAt(0)}
+            {campaign.org}
           </div>
           <div>
             <h3 className="font-semibold">{campaign.org}</h3>
@@ -219,11 +246,14 @@ Every donation, no matter the size, makes a direct impact on the lives of earthq
           <div className="text-sm space-y-2 text-gray-700">
             <div className="flex justify-between">
               <span>Category</span>
-              <span>{campaign.labelRight || "N/A"}</span>
+              <span>{campaign.category || "N/A"}</span>
             </div>
             <div className="flex justify-between">
               <span>Days Left</span>
-              <span>{campaign.daysLeft}</span>
+              {Math.floor(
+                (new Date(campaign.end_date) - new Date(campaign.start_date)) /
+                  (1000 * 60 * 60 * 24)
+              )}{" "}
             </div>
             <div className="flex justify-between">
               <span>Donors</span>
@@ -231,7 +261,7 @@ Every donation, no matter the size, makes a direct impact on the lives of earthq
             </div>
             <div className="flex justify-between">
               <span>Goal</span>
-              <span>${campaign.goal.toLocaleString()}</span>
+              <span>${campaign.goal_amount}</span>
             </div>
           </div>
         </div>

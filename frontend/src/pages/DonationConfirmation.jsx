@@ -1,8 +1,8 @@
 import { useState } from "react";
+import api from "../API/api";
 import { useParams, useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
-import { campaigns } from "../data/campaigns";
-import { 
+import {
   Check,
   ChevronLeft,
   DollarSign,
@@ -17,38 +17,40 @@ import {
   Info,
   AlertCircle,
   Download,
-  Receipt
-} from 'lucide-react';
+  Receipt,
+} from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
+import { useEffect } from "react";
 
 const donationTypeInfo = {
   money: {
-    title: 'Financial Donation',
+    title: "Financial Donation",
     icon: DollarSign,
-    color: 'bg-blue-500',
-    bgColor: 'bg-blue-100',
-    textColor: 'text-blue-700'
+    color: "bg-blue-500",
+    bgColor: "bg-blue-100",
+    textColor: "text-blue-700",
   },
   food: {
-    title: 'Food Donation',
+    title: "Food Donation",
     icon: Apple,
-    color: 'bg-green-500',
-    bgColor: 'bg-green-100',
-    textColor: 'text-green-700'
+    color: "bg-green-500",
+    bgColor: "bg-green-100",
+    textColor: "text-green-700",
   },
   clothes: {
-    title: 'Clothing Donation',
+    title: "Clothing Donation",
     icon: Shirt,
-    color: 'bg-orange-500',
-    bgColor: 'bg-orange-100',
-    textColor: 'text-orange-700'
+    color: "bg-orange-500",
+    bgColor: "bg-orange-100",
+    textColor: "text-orange-700",
   },
-  'medical supplies': {
-    title: 'Medical Supplies',
+  "medical-supplies": {
+    title: "Medical Supplies",
     icon: Cross,
-    color: 'bg-red-500',
-    bgColor: 'bg-red-100',
-    textColor: 'text-red-700'
-  }
+    color: "bg-red-500",
+    bgColor: "bg-red-100",
+    textColor: "text-red-700",
+  },
 };
 
 // Medical supplies checklist items
@@ -64,7 +66,7 @@ const medicalSuppliesChecklist = [
   "Face Masks",
   "Wheelchairs",
   "Crutches",
-  "Walking Aids"
+  "Walking Aids",
 ];
 
 // Clothing types checklist
@@ -76,57 +78,96 @@ const clothingTypes = [
   "Accessories",
   "Winter Wear",
   "Professional Wear",
-  "Sportswear"
+  "Sportswear",
 ];
 
 export default function DonationConfirmation() {
   const { id, type } = useParams();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
-  const [donationType] = useState(type || 'money');
+  const [campaign, setCampaign] = useState([]);
+  const [donationType] = useState(type || "money");
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [selectedMedicalItems, setSelectedMedicalItems] = useState([]);
   const [selectedClothingTypes, setSelectedClothingTypes] = useState([]);
-  const [donationReference, setDonationReference] = useState('');
+  const [donationReference, setDonationReference] = useState("");
   const [formData, setFormData] = useState({
-    amount: '',
-    customAmount: '',
-    paymentMethod: 'card',
-    cardNumber: '',
-    cardExpiry: '',
-    cardCvv: '',
-    upiId: '',
-    foodItems: '',
-    foodQuantity: '',
-    dropoffLocation: '',
-    timeSlot: '',
-    medicalItems: '',
-    expiryDate: '',
-    medicalCondition: '',
+    amount: "",
+    customAmount: "",
+    paymentMethod: "card",
+    cardNumber: "",
+    cardExpiry: "",
+    cardCvv: "",
+    upiId: "",
+    foodItems: "",
+    foodQuantity: "",
+    dropoffLocation: "",
+    timeSlot: "",
+    medicalItems: "",
+    expiryDate: "",
+    medicalCondition: "",
     pickupRequested: false,
-    clothingType: '',
-    clothingCondition: '',
-    specialInstructions: ''
+    clothingType: "",
+    clothingCondition: "",
+    specialInstructions: "",
+    campaign_id: id,
+    donor_id: user.user_id,
   });
+  useEffect(() => {
+    const getCampaignDet = async () => {
+      try {
+        console.log("id:",id)
+        const result = await api.get(`/campaign/one/${id}`);
+        console.log("result",result);
+        const firstCampaign = result.data.campaign || null;
+        setCampaign(firstCampaign);
+        console.log("Fetched campaign:", firstCampaign);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    getCampaignDet();
+  }, [user]);
 
-  const campaign = campaigns.find(c => c.id === parseInt(id)) || campaigns[0];
+  const submitDonation = async () => {
+    if (formData.amount) {
+      const res = await api.post("donations/money", formData, {
+        headers: { "Content-Type": "application/json" },
+      });
+      nextStep();
+    } else if (formData.foodItems) {
+      const res = await api.post("donations/food", formData, {
+        headers: { "Content-Type": "application/json" },
+      });
+      nextStep();
+    } else if (formData.medicalItems) {
+      const res = await api.post("donations/medical", formData, {
+        headers: { "Content-Type": "application/json" },
+      });
+      nextStep();
+    } else if (formData.clothingType) {
+      const res = await api.post("donations/clothing", formData, {
+        headers: { "Content-Type": "application/json" },
+      });
+      nextStep();
+    }
+  };
+
   const donationInfo = donationTypeInfo[donationType];
   const DonationIcon = donationInfo.icon;
 
-  // Check if the selected donation type is available for this campaign
-  const isDonationTypeAvailable = campaign.donationTypes.includes(donationType);
-
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
   const handleMedicalItemSelect = (item) => {
     if (selectedMedicalItems.includes(item)) {
-      setSelectedMedicalItems(selectedMedicalItems.filter(i => i !== item));
+      setSelectedMedicalItems(selectedMedicalItems.filter((i) => i !== item));
     } else {
       setSelectedMedicalItems([...selectedMedicalItems, item]);
     }
@@ -134,7 +175,7 @@ export default function DonationConfirmation() {
 
   const handleClothingTypeSelect = (item) => {
     if (selectedClothingTypes.includes(item)) {
-      setSelectedClothingTypes(selectedClothingTypes.filter(i => i !== item));
+      setSelectedClothingTypes(selectedClothingTypes.filter((i) => i !== item));
     } else {
       setSelectedClothingTypes([...selectedClothingTypes, item]);
     }
@@ -148,14 +189,14 @@ export default function DonationConfirmation() {
     }
     setStep(step + 1);
   };
-  
+
   const prevStep = () => setStep(step - 1);
 
   // Generate receipt content
   const generateReceiptContent = () => {
     const donationDate = new Date().toLocaleDateString();
     const donationTime = new Date().toLocaleTimeString();
-    
+
     return `
       <!DOCTYPE html>
       <html>
@@ -241,7 +282,7 @@ export default function DonationConfirmation() {
       </head>
       <body>
         <div class="header">
-          <div class="logo">HopeBridge</div>
+          <div class="logo">${campaign.organization_name}</div>
           <h1 class="receipt-title">DONATION RECEIPT</h1>
           <div class="reference">Reference ID: ${donationReference}</div>
           <div>Date: ${donationDate} | Time: ${donationTime}</div>
@@ -250,9 +291,15 @@ export default function DonationConfirmation() {
         <div class="section">
           <div class="section-title">Campaign Information</div>
           <div class="campaign-info">
-            <div><span class="label">Campaign:</span> <span class="value">${campaign.title}</span></div>
-            <div><span class="label">Organization:</span> <span class="value">HopeBridge Foundation</span></div>
-            <div><span class="label">Description:</span> <span class="value">${campaign.description}</span></div>
+            <div><span class="label">Campaign:</span> <span class="value">${
+              campaign.title
+            }</span></div>
+            <div><span class="label">Organization:</span> <span class="value">${
+              campaign.organization_name
+            }</span></div>
+            <div><span class="label">Description:</span> <span class="value">${
+              campaign.description
+            }</span></div>
           </div>
         </div>
 
@@ -267,67 +314,131 @@ export default function DonationConfirmation() {
               <span class="label">Date:</span><br>
               <span class="value">${donationDate}</span>
             </div>
-            ${donationType === 'money' ? `
+            ${
+              donationType === "money"
+                ? `
             <div class="info-item">
               <span class="label">Amount:</span><br>
-              <span class="value">$${formData.amount === 'custom' ? formData.customAmount : formData.amount}</span>
+              <span class="value">$${
+                formData.amount === "custom"
+                  ? formData.customAmount
+                  : formData.amount
+              }</span>
             </div>
             <div class="info-item">
               <span class="label">Payment Method:</span><br>
-              <span class="value">${formData.paymentMethod === 'card' ? 'Credit/Debit Card' : 
-                formData.paymentMethod === 'upi' ? 'UPI' : 
-                formData.paymentMethod === 'netbanking' ? 'Net Banking' : 
-                'Wallet'}</span>
+              <span class="value">${
+                formData.paymentMethod === "card"
+                  ? "Credit/Debit Card"
+                  : formData.paymentMethod === "upi"
+                  ? "UPI"
+                  : formData.paymentMethod === "netbanking"
+                  ? "Net Banking"
+                  : "Wallet"
+              }</span>
             </div>
-            ` : ''}
-            ${donationType === 'food' ? `
-            ${formData.foodItems ? `<div class="info-item">
+            `
+                : ""
+            }
+            ${
+              donationType === "food"
+                ? `
+            ${
+              formData.foodItems
+                ? `<div class="info-item">
               <span class="label">Food Items:</span><br>
               <span class="value">${formData.foodItems}</span>
-            </div>` : ''}
-            ${formData.foodQuantity ? `<div class="info-item">
+            </div>`
+                : ""
+            }
+            ${
+              formData.foodQuantity
+                ? `<div class="info-item">
               <span class="label">Quantity:</span><br>
               <span class="value">${formData.foodQuantity}</span>
-            </div>` : ''}
-            ${formData.dropoffLocation ? `<div class="info-item">
+            </div>`
+                : ""
+            }
+            ${
+              formData.dropoffLocation
+                ? `<div class="info-item">
               <span class="label">Drop-off Location:</span><br>
-              <span class="value">${formData.dropoffLocation === 'central-warehouse' ? 'Central Warehouse' : 
-                formData.dropoffLocation === 'north-distribution' ? 'North Distribution Center' : 
-                formData.dropoffLocation === 'south-community' ? 'South Community Center' : 
-                'East Shelter'}</span>
-            </div>` : ''}
-            ` : ''}
-            ${donationType === 'clothes' ? `
-            ${selectedClothingTypes.length > 0 ? `<div class="info-item">
+              <span class="value">${
+                formData.dropoffLocation === "central-warehouse"
+                  ? "Central Warehouse"
+                  : formData.dropoffLocation === "north-distribution"
+                  ? "North Distribution Center"
+                  : formData.dropoffLocation === "south-community"
+                  ? "South Community Center"
+                  : "East Shelter"
+              }</span>
+            </div>`
+                : ""
+            }
+            `
+                : ""
+            }
+            ${
+              donationType === "clothes"
+                ? `
+            ${
+              selectedClothingTypes.length > 0
+                ? `<div class="info-item">
               <span class="label">Clothing Types:</span><br>
-              <span class="value">${selectedClothingTypes.join(', ')}</span>
-            </div>` : ''}
-            ${formData.clothingCondition ? `<div class="info-item">
+              <span class="value">${selectedClothingTypes.join(", ")}</span>
+            </div>`
+                : ""
+            }
+            ${
+              formData.clothingCondition
+                ? `<div class="info-item">
               <span class="label">Condition:</span><br>
               <span class="value">${formData.clothingCondition}</span>
-            </div>` : ''}
-            ` : ''}
-            ${donationType === 'medical supplies' ? `
-            ${selectedMedicalItems.length > 0 ? `<div class="info-item">
+            </div>`
+                : ""
+            }
+            `
+                : ""
+            }
+            ${
+              donationType === "medical supplies"
+                ? `
+            ${
+              selectedMedicalItems.length > 0
+                ? `<div class="info-item">
               <span class="label">Medical Items:</span><br>
-              <span class="value">${selectedMedicalItems.join(', ')}</span>
-            </div>` : ''}
-            ${formData.expiryDate ? `<div class="info-item">
+              <span class="value">${selectedMedicalItems.join(", ")}</span>
+            </div>`
+                : ""
+            }
+            ${
+              formData.expiryDate
+                ? `<div class="info-item">
               <span class="label">Earliest Expiry:</span><br>
               <span class="value">${formData.expiryDate}</span>
-            </div>` : ''}
+            </div>`
+                : ""
+            }
             <div class="info-item">
               <span class="label">Pickup Requested:</span><br>
-              <span class="value">${formData.pickupRequested ? 'Yes' : 'No'}</span>
+              <span class="value">${
+                formData.pickupRequested ? "Yes" : "No"
+              }</span>
             </div>
-            ` : ''}
+            `
+                : ""
+            }
           </div>
-          ${formData.specialInstructions ? `
+          ${
+            formData.specialInstructions
+              ? `
           <div class="info-item" style="margin-top: 15px;">
             <span class="label">Special Instructions:</span><br>
             <span class="value">${formData.specialInstructions}</span>
           </div>
-          ` : ''}
+          `
+              : ""
+          }
         </div>
 
         <div class="thank-you">
@@ -335,7 +446,7 @@ export default function DonationConfirmation() {
         </div>
 
         <div class="footer">
-          <p>HopeBridge Foundation</p>
+          <p>${campaign.organization_name}</p>
           <p>123 Charity Street, Compassion City</p>
           <p>Email: contact@hopebridge.org | Phone: (555) 123-HELP</p>
           <p>This receipt is generated electronically and does not require a signature.</p>
@@ -348,9 +459,9 @@ export default function DonationConfirmation() {
   // Download receipt as PDF
   const downloadReceipt = () => {
     const receiptContent = generateReceiptContent();
-    const blob = new Blob([receiptContent], { type: 'text/html' });
+    const blob = new Blob([receiptContent], { type: "text/html" });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
     link.download = `donation-receipt-${donationReference}.html`;
     document.body.appendChild(link);
@@ -362,7 +473,7 @@ export default function DonationConfirmation() {
   // Print receipt
   const printReceipt = () => {
     const receiptContent = generateReceiptContent();
-    const printWindow = window.open('', '_blank');
+    const printWindow = window.open("", "_blank");
     printWindow.document.write(receiptContent);
     printWindow.document.close();
     printWindow.focus();
@@ -371,8 +482,8 @@ export default function DonationConfirmation() {
   };
 
   const renderPaymentMethodFields = () => {
-    switch(formData.paymentMethod) {
-      case 'card':
+    switch (formData.paymentMethod) {
+      case "card":
         return (
           <div className="space-y-4 mt-4 p-4 bg-gray-50 rounded-lg">
             <div>
@@ -421,8 +532,8 @@ export default function DonationConfirmation() {
             </div>
           </div>
         );
-      
-      case 'upi':
+
+      case "upi":
         return (
           <div className="space-y-4 mt-4 p-4 bg-gray-50 rounded-lg">
             <div>
@@ -439,12 +550,14 @@ export default function DonationConfirmation() {
               />
             </div>
             <div className="text-center text-sm text-gray-600">
-              <p>You'll be redirected to your UPI app to complete the payment</p>
+              <p>
+                You'll be redirected to your UPI app to complete the payment
+              </p>
             </div>
           </div>
         );
-      
-      case 'netbanking':
+
+      case "netbanking":
         return (
           <div className="space-y-4 mt-4 p-4 bg-gray-50 rounded-lg">
             <div>
@@ -462,12 +575,15 @@ export default function DonationConfirmation() {
               </select>
             </div>
             <div className="text-center text-sm text-gray-600">
-              <p>You'll be redirected to your bank's website to complete the payment</p>
+              <p>
+                You'll be redirected to your bank's website to complete the
+                payment
+              </p>
             </div>
           </div>
         );
-      
-      case 'wallet':
+
+      case "wallet":
         return (
           <div className="space-y-4 mt-4 p-4 bg-gray-50 rounded-lg">
             <div>
@@ -483,59 +599,56 @@ export default function DonationConfirmation() {
               </select>
             </div>
             <div className="text-center text-sm text-gray-600">
-              <p>You'll be redirected to your wallet app to complete the payment</p>
+              <p>
+                You'll be redirected to your wallet app to complete the payment
+              </p>
             </div>
           </div>
         );
-      
+
       default:
         return null;
     }
   };
 
   const renderStep = () => {
-    switch(step) {
+    switch (step) {
       case 1:
         return (
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-gray-800">
-              {donationType === 'clothes' ? 'Clothing Donation' : 
-               donationType === 'food' ? 'Food Donation' :
-               donationType === 'medical supplies' ? 'Medical Supplies Donation' :
-               'Donation Details'}
+              {donationType === "clothes"
+                ? "Clothing Donation"
+                : donationType === "food"
+                ? "Food Donation"
+                : donationType === "medical-supplies"
+                ? "Medical Supplies Donation"
+                : "Donation Details"}
             </h2>
-            
-            {/* Show error if donation type is not available for this campaign */}
-            {!isDonationTypeAvailable && (
-              <div className="bg-red-100 text-red-800 p-4 rounded-lg">
-                <p>This campaign does not accept {donationInfo.title.toLowerCase()} donations.</p>
-                <button
-                  onClick={() => navigate(`/campaigns/${id}`)}
-                  className="mt-2 text-red-700 underline"
-                >
-                  Return to campaign page to choose a different donation type
-                </button>
-              </div>
-            )}
-            
+
             {/* Render form based on donation type */}
-            {donationType === 'money' && (
+            {donationType === "money" && (
               <>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Donation Amount
                   </label>
                   <div className="grid grid-cols-3 gap-2 mb-3">
-                    {[25, 50, 100, 250, 500].map(amount => (
+                    {[25, 50, 100, 250, 500].map((amount) => (
                       <button
                         key={amount}
                         type="button"
                         className={`py-2 rounded-lg border ${
                           formData.amount === amount.toString()
-                            ? 'bg-rose-500 text-white border-rose-500'
-                            : 'bg-white text-gray-700 border-gray-300 hover:border-rose-300'
+                            ? "bg-rose-500 text-white border-rose-500"
+                            : "bg-white text-gray-700 border-gray-300 hover:border-rose-300"
                         }`}
-                        onClick={() => setFormData({...formData, amount: amount.toString()})}
+                        onClick={() =>
+                          setFormData({
+                            ...formData,
+                            amount: amount.toString(),
+                          })
+                        }
                       >
                         ${amount}
                       </button>
@@ -558,62 +671,73 @@ export default function DonationConfirmation() {
                     <button
                       type="button"
                       className={`p-4 border rounded-lg flex flex-col items-center ${
-                        formData.paymentMethod === 'card' 
-                          ? 'border-rose-500 bg-rose-50' 
-                          : 'border-gray-300 hover:border-rose-300'
+                        formData.paymentMethod === "card"
+                          ? "border-rose-500 bg-rose-50"
+                          : "border-gray-300 hover:border-rose-300"
                       }`}
-                      onClick={() => setFormData({...formData, paymentMethod: 'card'})}
+                      onClick={() =>
+                        setFormData({ ...formData, paymentMethod: "card" })
+                      }
                     >
                       <CreditCard className="h-6 w-6 mb-2 text-gray-700" />
                       <span className="text-sm">Card</span>
                     </button>
-                    
+
                     <button
                       type="button"
                       className={`p-4 border rounded-lg flex flex-col items-center ${
-                        formData.paymentMethod === 'upi' 
-                          ? 'border-rose-500 bg-rose-50' 
-                          : 'border-gray-300 hover:border-rose-300'
+                        formData.paymentMethod === "upi"
+                          ? "border-rose-500 bg-rose-50"
+                          : "border-gray-300 hover:border-rose-300"
                       }`}
-                      onClick={() => setFormData({...formData, paymentMethod: 'upi'})}
+                      onClick={() =>
+                        setFormData({ ...formData, paymentMethod: "upi" })
+                      }
                     >
                       <QrCode className="h-6 w-6 mb-2 text-gray-700" />
                       <span className="text-sm">UPI</span>
                     </button>
-                    
+
                     <button
                       type="button"
                       className={`p-4 border rounded-lg flex flex-col items-center ${
-                        formData.paymentMethod === 'netbanking' 
-                          ? 'border-rose-500 bg-rose-50' 
-                          : 'border-gray-300 hover:border-rose-300'
+                        formData.paymentMethod === "netbanking"
+                          ? "border-rose-500 bg-rose-50"
+                          : "border-gray-300 hover:border-rose-300"
                       }`}
-                      onClick={() => setFormData({...formData, paymentMethod: 'netbanking'})}
+                      onClick={() =>
+                        setFormData({
+                          ...formData,
+                          paymentMethod: "netbanking",
+                        })
+                      }
                     >
                       <Building className="h-6 w-6 mb-2 text-gray-700" />
                       <span className="text-sm">Net Banking</span>
                     </button>
-                    
+
                     <button
                       type="button"
                       className={`p-4 border rounded-lg flex flex-col items-center ${
-                        formData.paymentMethod === 'wallet' 
-                          ? 'border-rose-500 bg-rose-50' 
-                          : 'border-gray-300 hover:border-rose-300'
+                        formData.paymentMethod === "wallet"
+                          ? "border-rose-500 bg-rose-50"
+                          : "border-gray-300 hover:border-rose-300"
                       }`}
-                      onClick={() => setFormData({...formData, paymentMethod: 'wallet'})}
+                      onClick={() =>
+                        setFormData({ ...formData, paymentMethod: "wallet" })
+                      }
                     >
                       <Smartphone className="h-6 w-6 mb-2 text-gray-700" />
                       <span className="text-sm">Wallet</span>
                     </button>
                   </div>
-                  
+
                   {renderPaymentMethodFields()}
                 </div>
               </>
             )}
-            
-            {donationType === 'food' && (
+
+            {donationType === "food" && (
               <>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -627,7 +751,7 @@ export default function DonationConfirmation() {
                     className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-rose-300 h-20"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Estimated Quantity
@@ -641,7 +765,7 @@ export default function DonationConfirmation() {
                     className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-rose-300"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Drop-off Location
@@ -653,13 +777,21 @@ export default function DonationConfirmation() {
                     className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-rose-300"
                   >
                     <option value="">Select drop-off location</option>
-                    <option value="central-warehouse">Central Warehouse - 123 Main St</option>
-                    <option value="north-distribution">North Distribution Center - 456 Oak Ave</option>
-                    <option value="south-community">South Community Center - 789 Pine Rd</option>
-                    <option value="east-shelter">East Shelter - 101 Elm Blvd</option>
+                    <option value="central-warehouse">
+                      Central Warehouse - 123 Main St
+                    </option>
+                    <option value="north-distribution">
+                      North Distribution Center - 456 Oak Ave
+                    </option>
+                    <option value="south-community">
+                      South Community Center - 789 Pine Rd
+                    </option>
+                    <option value="east-shelter">
+                      East Shelter - 101 Elm Blvd
+                    </option>
                   </select>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Preferred Time Slot
@@ -676,22 +808,26 @@ export default function DonationConfirmation() {
                     <option value="evening">Evening (5 PM - 7 PM)</option>
                   </select>
                 </div>
-                
+
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                   <div className="flex items-start gap-2 mb-3">
                     <Info className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                    <h3 className="font-medium text-blue-800">Packing Instructions</h3>
+                    <h3 className="font-medium text-blue-800">
+                      Packing Instructions
+                    </h3>
                   </div>
                   <p className="text-sm text-blue-700 mb-2">Please ensure:</p>
                   <ul className="text-sm text-blue-700 space-y-1 list-disc list-inside">
                     <li>All items are within expiration dates</li>
                     <li>Canned goods are unexpired and unopened</li>
                     <li>Items are packed in clean, sturdy bags or boxes</li>
-                    <li>Perishable items are properly refrigerated before drop-off</li>
+                    <li>
+                      Perishable items are properly refrigerated before drop-off
+                    </li>
                     <li>No glass containers (safety policy)</li>
                   </ul>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Special Instructions (Optional)
@@ -706,22 +842,31 @@ export default function DonationConfirmation() {
                 </div>
               </>
             )}
-            
-            {donationType === 'clothes' && (
+
+            {donationType === "clothes" && (
               <>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Clothing Types</h3>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                    Clothing Types
+                  </h3>
                   <div className="grid grid-cols-2 gap-3 mb-6">
                     {clothingTypes.map((item) => (
                       <div key={item} className="flex items-center">
                         <input
                           type="checkbox"
-                          id={`clothing-${item.replace(/\s+/g, '-').toLowerCase()}`}
+                          id={`clothing-${item
+                            .replace(/\s+/g, "-")
+                            .toLowerCase()}`}
                           checked={selectedClothingTypes.includes(item)}
                           onChange={() => handleClothingTypeSelect(item)}
                           className="h-5 w-5 text-rose-500 rounded-full mr-2"
                         />
-                        <label htmlFor={`clothing-${item.replace(/\s+/g, '-').toLowerCase()}`} className="text-sm text-gray-700">
+                        <label
+                          htmlFor={`clothing-${item
+                            .replace(/\s+/g, "-")
+                            .toLowerCase()}`}
+                          className="text-sm text-gray-700"
+                        >
                           {item}
                         </label>
                       </div>
@@ -730,7 +875,9 @@ export default function DonationConfirmation() {
                 </div>
 
                 <div className="mb-6">
-                  <h4 className="text-md font-medium text-gray-700 mb-2">Condition</h4>
+                  <h4 className="text-md font-medium text-gray-700 mb-2">
+                    Condition
+                  </h4>
                   <select
                     name="clothingCondition"
                     value={formData.clothingCondition}
@@ -746,7 +893,9 @@ export default function DonationConfirmation() {
                 </div>
 
                 <div className="mb-6">
-                  <h4 className="text-md font-medium text-gray-700 mb-2">Drop-off Instructions</h4>
+                  <h4 className="text-md font-medium text-gray-700 mb-2">
+                    Drop-off Instructions
+                  </h4>
                   <select
                     name="dropoffLocation"
                     value={formData.dropoffLocation}
@@ -754,17 +903,27 @@ export default function DonationConfirmation() {
                     className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-rose-300"
                   >
                     <option value="">Select drop-off location</option>
-                    <option value="central-warehouse">Central Warehouse - 123 Main St</option>
-                    <option value="north-distribution">North Distribution Center - 456 Oak Ave</option>
-                    <option value="south-community">South Community Center - 789 Pine Rd</option>
-                    <option value="east-shelter">East Shelter - 101 Elm Blvd</option>
+                    <option value="central-warehouse">
+                      Central Warehouse - 123 Main St
+                    </option>
+                    <option value="north-distribution">
+                      North Distribution Center - 456 Oak Ave
+                    </option>
+                    <option value="south-community">
+                      South Community Center - 789 Pine Rd
+                    </option>
+                    <option value="east-shelter">
+                      East Shelter - 101 Elm Blvd
+                    </option>
                   </select>
                 </div>
 
                 <div className="bg-orange-50 p-4 rounded-lg border border-orange-200 mb-6">
                   <div className="flex items-start gap-2 mb-3">
                     <Info className="h-5 w-5 text-orange-600 mt-0.5 flex-shrink-0" />
-                    <h3 className="font-medium text-orange-800">Donation Guidelines:</h3>
+                    <h3 className="font-medium text-orange-800">
+                      Donation Guidelines:
+                    </h3>
                   </div>
                   <ul className="text-sm text-orange-700 space-y-2 list-disc list-inside">
                     <li>Items should be clean and in good condition</li>
@@ -789,22 +948,27 @@ export default function DonationConfirmation() {
                 </div>
               </>
             )}
-            
-            {donationType === 'medical supplies' && (
+
+            {donationType === "medical-supplies" && (
               <>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Medical Supplies Checklist</h3>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                    Medical Supplies Checklist
+                  </h3>
                   <div className="grid grid-cols-2 gap-3 mb-6">
                     {medicalSuppliesChecklist.map((item) => (
                       <div key={item} className="flex items-center">
                         <input
                           type="checkbox"
-                          id={item.replace(/\s+/g, '-').toLowerCase()}
+                          id={item.replace(/\s+/g, "-").toLowerCase()}
                           checked={selectedMedicalItems.includes(item)}
                           onChange={() => handleMedicalItemSelect(item)}
                           className="h-5 w-5 text-rose-500 rounded-full mr-2"
                         />
-                        <label htmlFor={item.replace(/\s+/g, '-').toLowerCase()} className="text-sm text-gray-700">
+                        <label
+                          htmlFor={item.replace(/\s+/g, "-").toLowerCase()}
+                          className="text-sm text-gray-700"
+                        >
                           {item}
                         </label>
                       </div>
@@ -815,11 +979,17 @@ export default function DonationConfirmation() {
                 <div className="bg-red-50 p-4 rounded-lg border border-red-200 mb-6">
                   <div className="flex items-start gap-2 mb-3">
                     <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
-                    <h3 className="font-medium text-red-800">Expiry Date Validation</h3>
+                    <h3 className="font-medium text-red-800">
+                      Expiry Date Validation
+                    </h3>
                   </div>
-                  <p className="text-sm text-red-700 mb-2 font-medium">Important:</p>
+                  <p className="text-sm text-red-700 mb-2 font-medium">
+                    Important:
+                  </p>
                   <p className="text-sm text-red-700 mb-3">
-                    All medical supplies must have at least 6 months before expiration. Items past expiry cannot be accepted for safety reasons.
+                    All medical supplies must have at least 6 months before
+                    expiration. Items past expiry cannot be accepted for safety
+                    reasons.
                   </p>
                   <div>
                     <label className="block text-sm font-medium text-red-700 mb-2">
@@ -849,7 +1019,9 @@ export default function DonationConfirmation() {
                     <option value="new-unopened">New & Unopened</option>
                     <option value="sterile">Sterile & Sealed</option>
                     <option value="good">Good Condition</option>
-                    <option value="requires-special-handling">Requires Special Handling</option>
+                    <option value="requires-special-handling">
+                      Requires Special Handling
+                    </option>
                   </select>
                 </div>
 
@@ -862,7 +1034,10 @@ export default function DonationConfirmation() {
                     onChange={handleInputChange}
                     className="h-5 w-5 text-rose-500 rounded-full"
                   />
-                  <label htmlFor="pickupRequestedMedical" className="text-sm text-gray-700">
+                  <label
+                    htmlFor="pickupRequestedMedical"
+                    className="text-sm text-gray-700"
+                  >
                     Request pickup service (for large or heavy items)
                   </label>
                 </div>
@@ -891,12 +1066,7 @@ export default function DonationConfirmation() {
               </button>
               <button
                 onClick={nextStep}
-                disabled={!isDonationTypeAvailable}
-                className={`flex-1 py-3 rounded-lg transition ${
-                  isDonationTypeAvailable 
-                    ? 'bg-rose-500 text-white hover:bg-rose-600' 
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
+                className={`flex-1 py-3 rounded-lg transition bg-gray-300 text-gray-500 cursor-not-allowed`}
               >
                 Continue
               </button>
@@ -907,70 +1077,89 @@ export default function DonationConfirmation() {
       case 2:
         return (
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-800">Confirm Your Donation</h2>
-            
+            <h2 className="text-2xl font-bold text-gray-800">
+              Confirm Your Donation
+            </h2>
+
             <div className="bg-gray-50 p-6 rounded-lg">
               <h3 className="font-semibold text-lg mb-4">Donation Summary</h3>
-              
+
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Campaign:</span>
-                  <span className="font-medium">{campaign.title}</span>
+                  <span className="font-medium">{campaign?.title}</span>
                 </div>
-                
+
                 <div className="flex justify-between">
                   <span className="text-gray-600">Donation Type:</span>
                   <span className="font-medium">{donationInfo.title}</span>
                 </div>
-                
+
                 <div className="flex justify-between">
                   <span className="text-gray-600">Date:</span>
-                  <span className="font-medium">{new Date().toLocaleDateString()}</span>
+                  <span className="font-medium">
+                    {new Date().toLocaleDateString()}
+                  </span>
                 </div>
 
                 {/* Show details based on donation type */}
-                {donationType === 'money' && (
+                {donationType === "money" && (
                   <>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Amount:</span>
                       <span className="font-medium">
-                        ${formData.amount === 'custom' ? formData.customAmount : formData.amount}
+                        $
+                        {formData.amount === "custom"
+                          ? formData.customAmount
+                          : formData.amount}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Payment Method:</span>
                       <span className="font-medium capitalize">
-                        {formData.paymentMethod === 'card' && 'Credit/Debit Card'}
-                        {formData.paymentMethod === 'upi' && 'UPI'}
-                        {formData.paymentMethod === 'netbanking' && 'Net Banking'}
-                        {formData.paymentMethod === 'wallet' && 'Wallet'}
+                        {formData.paymentMethod === "card" &&
+                          "Credit/Debit Card"}
+                        {formData.paymentMethod === "upi" && "UPI"}
+                        {formData.paymentMethod === "netbanking" &&
+                          "Net Banking"}
+                        {formData.paymentMethod === "wallet" && "Wallet"}
                       </span>
                     </div>
                   </>
                 )}
-                
-                {donationType === 'food' && (
+
+                {donationType === "food" && (
                   <>
                     {formData.foodItems && (
                       <div className="flex justify-between">
                         <span className="text-gray-600">Food Items:</span>
-                        <span className="font-medium">{formData.foodItems}</span>
+                        <span className="font-medium">
+                          {formData.foodItems}
+                        </span>
                       </div>
                     )}
                     {formData.foodQuantity && (
                       <div className="flex justify-between">
                         <span className="text-gray-600">Quantity:</span>
-                        <span className="font-medium">{formData.foodQuantity}</span>
+                        <span className="font-medium">
+                          {formData.foodQuantity}
+                        </span>
                       </div>
                     )}
                     {formData.dropoffLocation && (
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Drop-off Location:</span>
+                        <span className="text-gray-600">
+                          Drop-off Location:
+                        </span>
                         <span className="font-medium capitalize">
-                          {formData.dropoffLocation === 'central-warehouse' && 'Central Warehouse'}
-                          {formData.dropoffLocation === 'north-distribution' && 'North Distribution Center'}
-                          {formData.dropoffLocation === 'south-community' && 'South Community Center'}
-                          {formData.dropoffLocation === 'east-shelter' && 'East Shelter'}
+                          {formData.dropoffLocation === "central-warehouse" &&
+                            "Central Warehouse"}
+                          {formData.dropoffLocation === "north-distribution" &&
+                            "North Distribution Center"}
+                          {formData.dropoffLocation === "south-community" &&
+                            "South Community Center"}
+                          {formData.dropoffLocation === "east-shelter" &&
+                            "East Shelter"}
                         </span>
                       </div>
                     )}
@@ -978,83 +1167,109 @@ export default function DonationConfirmation() {
                       <div className="flex justify-between">
                         <span className="text-gray-600">Time Slot:</span>
                         <span className="font-medium capitalize">
-                          {formData.timeSlot === 'morning' && 'Morning (9 AM - 12 PM)'}
-                          {formData.timeSlot === 'afternoon' && 'Afternoon (1 PM - 4 PM)'}
-                          {formData.timeSlot === 'evening' && 'Evening (5 PM - 7 PM)'}
+                          {formData.timeSlot === "morning" &&
+                            "Morning (9 AM - 12 PM)"}
+                          {formData.timeSlot === "afternoon" &&
+                            "Afternoon (1 PM - 4 PM)"}
+                          {formData.timeSlot === "evening" &&
+                            "Evening (5 PM - 7 PM)"}
                         </span>
                       </div>
                     )}
                   </>
                 )}
-                
-                {donationType === 'clothes' && (
+
+                {donationType === "clothes" && (
                   <>
                     {selectedClothingTypes.length > 0 && (
                       <div className="flex justify-between">
                         <span className="text-gray-600">Clothing Types:</span>
                         <span className="font-medium text-right">
-                          {selectedClothingTypes.join(', ')}
+                          {selectedClothingTypes.join(", ")}
                         </span>
                       </div>
                     )}
                     {formData.clothingCondition && (
                       <div className="flex justify-between">
                         <span className="text-gray-600">Condition:</span>
-                        <span className="font-medium capitalize">{formData.clothingCondition}</span>
+                        <span className="font-medium capitalize">
+                          {formData.clothingCondition}
+                        </span>
                       </div>
                     )}
                     {formData.dropoffLocation && (
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Drop-off Location:</span>
+                        <span className="text-gray-600">
+                          Drop-off Location:
+                        </span>
                         <span className="font-medium capitalize">
-                          {formData.dropoffLocation === 'central-warehouse' && 'Central Warehouse'}
-                          {formData.dropoffLocation === 'north-distribution' && 'North Distribution Center'}
-                          {formData.dropoffLocation === 'south-community' && 'South Community Center'}
-                          {formData.dropoffLocation === 'east-shelter' && 'East Shelter'}
+                          {formData.dropoffLocation === "central-warehouse" &&
+                            "Central Warehouse"}
+                          {formData.dropoffLocation === "north-distribution" &&
+                            "North Distribution Center"}
+                          {formData.dropoffLocation === "south-community" &&
+                            "South Community Center"}
+                          {formData.dropoffLocation === "east-shelter" &&
+                            "East Shelter"}
                         </span>
                       </div>
                     )}
                   </>
                 )}
-                
-                {donationType === 'medical supplies' && (
+
+                {donationType === "medical supplies" && (
                   <>
                     {selectedMedicalItems.length > 0 && (
                       <div className="flex justify-between">
                         <span className="text-gray-600">Medical Items:</span>
                         <span className="font-medium text-right">
-                          {selectedMedicalItems.join(', ')}
+                          {selectedMedicalItems.join(", ")}
                         </span>
                       </div>
                     )}
                     {formData.expiryDate && (
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Earliest Expiry Date:</span>
-                        <span className="font-medium">{formData.expiryDate}</span>
+                        <span className="text-gray-600">
+                          Earliest Expiry Date:
+                        </span>
+                        <span className="font-medium">
+                          {formData.expiryDate}
+                        </span>
                       </div>
                     )}
                     {formData.medicalCondition && (
                       <div className="flex justify-between">
                         <span className="text-gray-600">Condition:</span>
                         <span className="font-medium capitalize">
-                          {formData.medicalCondition === 'new-unopened' && 'New & Unopened'}
-                          {formData.medicalCondition === 'sterile' && 'Sterile & Sealed'}
-                          {formData.medicalCondition === 'good' && 'Good Condition'}
-                          {formData.medicalCondition === 'requires-special-handling' && 'Requires Special Handling'}
+                          {formData.medicalCondition === "new-unopened" &&
+                            "New & Unopened"}
+                          {formData.medicalCondition === "sterile" &&
+                            "Sterile & Sealed"}
+                          {formData.medicalCondition === "good" &&
+                            "Good Condition"}
+                          {formData.medicalCondition ===
+                            "requires-special-handling" &&
+                            "Requires Special Handling"}
                         </span>
                       </div>
                     )}
                     <div className="flex justify-between">
                       <span className="text-gray-600">Pickup Requested:</span>
-                      <span className="font-medium">{formData.pickupRequested ? 'Yes' : 'No'}</span>
+                      <span className="font-medium">
+                        {formData.pickupRequested ? "Yes" : "No"}
+                      </span>
                     </div>
                   </>
                 )}
-                
+
                 {formData.specialInstructions && (
                   <div className="pt-3 border-t">
-                    <div className="text-gray-600 mb-1">Special Instructions:</div>
-                    <div className="font-medium">{formData.specialInstructions}</div>
+                    <div className="text-gray-600 mb-1">
+                      Special Instructions:
+                    </div>
+                    <div className="font-medium">
+                      {formData.specialInstructions}
+                    </div>
                   </div>
                 )}
               </div>
@@ -1068,7 +1283,8 @@ export default function DonationConfirmation() {
                 className="mt-1 h-5 w-5 text-rose-500 rounded-full"
               />
               <span className="text-sm text-gray-700">
-                I confirm that all information provided is accurate and I agree to the terms of this donation.
+                I confirm that all information provided is accurate and I agree
+                to the terms of this donation.
               </span>
             </label>
 
@@ -1080,12 +1296,12 @@ export default function DonationConfirmation() {
                 Back
               </button>
               <button
-                onClick={nextStep}
+                onClick={() => submitDonation()}
                 disabled={!agreeToTerms}
                 className={`flex-1 py-3 rounded-lg transition ${
-                  agreeToTerms 
-                    ? 'bg-rose-500 text-white hover:bg-rose-600' 
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  agreeToTerms
+                    ? "bg-rose-500 text-white hover:bg-rose-600"
+                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
                 }`}
               >
                 Confirm Donation
@@ -1099,35 +1315,59 @@ export default function DonationConfirmation() {
           <div className="text-center space-y-6">
             <div className="bg-green-100 text-green-800 p-6 rounded-lg">
               <Check className="h-16 w-16 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold mb-2">Thank You for Your Donation!</h2>
+              <h2 className="text-2xl font-bold mb-2">
+                Thank You for Your Donation!
+              </h2>
               <p>Your contribution will make a significant impact.</p>
             </div>
 
             <div className="bg-gray-50 p-6 rounded-lg text-left">
               <h3 className="font-semibold text-lg mb-4">Donation Confirmed</h3>
               <div className="space-y-2">
-                <p><strong>Campaign:</strong> {campaign.title}</p>
-                <p><strong>Donation Type:</strong> {donationInfo.title}</p>
-                <p><strong>Date:</strong> {new Date().toLocaleDateString()}</p>
-                <p><strong>Reference ID:</strong> {donationReference}</p>
-                
+                <p>
+                  <strong>Campaign:</strong>{" "}
+                  {campaign ? campaign.title : "Loading..."}
+                </p>
+                <p>
+                  <strong>Donation Type:</strong> {donationInfo.title}
+                </p>
+                <p>
+                  <strong>Date:</strong> {new Date().toLocaleDateString()}
+                </p>
+                <p>
+                  <strong>Reference ID:</strong> {donationReference}
+                </p>
+
                 {/* Show details based on donation type */}
-                {donationType === 'money' && (
-                  <p><strong>Amount:</strong> ${formData.amount === 'custom' ? formData.customAmount : formData.amount}</p>
-                )}
-                
-                {donationType === 'food' && formData.dropoffLocation && (
-                  <p><strong>Drop-off Location:</strong> 
-                    {formData.dropoffLocation === 'central-warehouse' && ' Central Warehouse'}
-                    {formData.dropoffLocation === 'north-distribution' && ' North Distribution Center'}
-                    {formData.dropoffLocation === 'south-community' && ' South Community Center'}
-                    {formData.dropoffLocation === 'east-shelter' && ' East Shelter'}
+                {donationType === "money" && (
+                  <p>
+                    <strong>Amount:</strong> $
+                    {formData.amount === "custom"
+                      ? formData.customAmount
+                      : formData.amount}
                   </p>
                 )}
 
-                {donationType === 'medical supplies' && formData.pickupRequested && (
-                  <p><strong>Pickup Service:</strong> Requested</p>
+                {donationType === "food" && formData.dropoffLocation && (
+                  <p>
+                    <strong>Drop-off Location:</strong>
+                    {formData.dropoffLocation === "central-warehouse" &&
+                      " Central Warehouse"}
+                    {formData.dropoffLocation === "north-distribution" &&
+                      " North Distribution Center"}
+                    {formData.dropoffLocation === "south-community" &&
+                      " South Community Center"}
+                    {formData.dropoffLocation === "east-shelter" &&
+                      " East Shelter"}
+                  </p>
                 )}
+
+                {donationType === "medical supplies" &&
+                  formData.pickupRequested && (
+                    <p>
+                      <strong>Pickup Service:</strong> Requested
+                    </p>
+                  )}
               </div>
             </div>
 
@@ -1135,10 +1375,13 @@ export default function DonationConfirmation() {
             <div className="bg-white border border-gray-200 rounded-lg p-6">
               <div className="flex items-center justify-center gap-2 mb-4">
                 <Receipt className="h-6 w-6 text-rose-500" />
-                <h3 className="text-lg font-semibold text-gray-800">Download Your Receipt</h3>
+                <h3 className="text-lg font-semibold text-gray-800">
+                  Download Your Receipt
+                </h3>
               </div>
               <p className="text-gray-600 mb-4">
-                Keep this receipt for your records. It may be useful for tax purposes or tracking your donations.
+                Keep this receipt for your records. It may be useful for tax
+                purposes or tracking your donations.
               </p>
               <div className="flex gap-3 justify-center">
                 <button
@@ -1160,14 +1403,14 @@ export default function DonationConfirmation() {
 
             <div className="flex gap-3">
               <button
-                onClick={() => navigate('/campaigns')}
+                onClick={() => navigate("/campaigns")}
                 className="flex-1 bg-gray-500 text-white py-3 rounded-lg hover:bg-gray-600 transition flex items-center justify-center gap-2"
               >
                 <Home className="h-4 w-4" />
                 Back to Campaigns
               </button>
               <button
-                onClick={() => navigate('/')}
+                onClick={() => navigate("/")}
                 className="flex-1 bg-rose-500 text-white py-3 rounded-lg hover:bg-rose-600 transition"
               >
                 Back to Home
@@ -1187,26 +1430,32 @@ export default function DonationConfirmation() {
       <div className="w-full bg-white/30 backdrop-blur-sm">
         <div className="mx-auto max-w-4xl px-4 py-2">
           <div className="flex items-center justify-between relative">
-            {[1, 2, 3].map(i => (
+            {[1, 2, 3].map((i) => (
               <div key={i} className="flex flex-col items-center z-10">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                  i < step ? 'bg-rose-500 text-white' : 
-                  i === step ? 'bg-white text-rose-500 border-2 border-rose-500' : 
-                  'bg-white/50 text-gray-400'
-                }`}>
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                    i < step
+                      ? "bg-rose-500 text-white"
+                      : i === step
+                      ? "bg-white text-rose-500 border-2 border-rose-500"
+                      : "bg-white/50 text-gray-400"
+                  }`}
+                >
                   {i < step ? <Check className="h-4 w-4" /> : i}
                 </div>
-                <span className={`text-xs mt-1 ${
-                  i <= step ? 'text-gray-800 font-medium' : 'text-gray-600'
-                }`}>
-                  {i === 1 && 'Details'}
-                  {i === 2 && 'Confirm'}
-                  {i === 3 && 'Complete'}
+                <span
+                  className={`text-xs mt-1 ${
+                    i <= step ? "text-gray-800 font-medium" : "text-gray-600"
+                  }`}
+                >
+                  {i === 1 && "Details"}
+                  {i === 2 && "Confirm"}
+                  {i === 3 && "Complete"}
                 </span>
               </div>
             ))}
             <div className="absolute top-1/2 left-4 right-4 h-0.5 bg-white/50 -translate-y-1/2 -z-10" />
-            <div 
+            <div
               className="absolute top-1/2 left-4 h-0.5 bg-rose-500 -translate-y-1/2 -z-10 transition-all duration-500"
               style={{ width: `${((step - 1) / 2) * 92}%` }}
             />
@@ -1219,19 +1468,27 @@ export default function DonationConfirmation() {
         <div className="bg-white/90 backdrop-blur-md p-8 rounded-2xl shadow-xl w-full max-w-2xl">
           {/* Header */}
           <div className="flex items-center gap-3 mb-6">
-            <button 
-              onClick={step === 1 ? () => navigate(`/campaigns/${id}`) : prevStep}
+            <button
+              onClick={
+                step === 1 ? () => navigate(`/campaigns/${id}`) : prevStep
+              }
               className="p-2 rounded-lg hover:bg-gray-100 transition"
             >
               <ChevronLeft className="h-5 w-5" />
             </button>
             <div className="flex-1">
-              <h1 className="text-2xl font-bold text-gray-800">{campaign.title}</h1>
+              <h1 className="text-2xl font-bold text-gray-800">
+                {campaign ? campaign.title : "Loading..."}
+              </h1>
               <div className="flex items-center gap-2 mt-1">
                 <div className={`p-2 rounded-full ${donationInfo.bgColor}`}>
-                  <DonationIcon className={`h-4 w-4 ${donationInfo.textColor}`} />
+                  <DonationIcon
+                    className={`h-4 w-4 ${donationInfo.textColor}`}
+                  />
                 </div>
-                <span className="text-sm text-gray-600">{donationInfo.title}</span>
+                <span className="text-sm text-gray-600">
+                  {donationInfo.title}
+                </span>
               </div>
             </div>
           </div>

@@ -183,7 +183,7 @@ export default function CreateCampaign() {
         createdDate: new Date().toISOString().split("T")[0],
         image:
           imagePreview ||
-          "https://images.unsplash.com/photo-1551524164-6ca5e3aa9c6a?q=80&w=1200&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1759420740201-7e7af435ca80?q=80&w=644&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       };
       const result = await api.post("/campaign/create", campaignData, {
         headers: {

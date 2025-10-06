@@ -311,12 +311,15 @@ export default function NGODashboard() {
   };
 
   const handleEditCampaign = (id) => {
-    const campaign = campaigns.find((c) => c.id === id);
+    const campaign = campaigns.find((c) => c.campaign_id === id);
+    
     navigate(`/edit-campaign/${id}`, { state: { campaign } });
   };
 
   const handleViewCampaign = (id) => {
-    navigate(`/donate/${id}`);
+    const campaign = campaigns.find((c) => c.campaign_id === id);
+    console.log("inisde ngodashboard ",campaign)
+    navigate(`/donate/${id}`,{state:{campaign}});
   };
 
   const handleDeleteCampaign = async (id) => {
