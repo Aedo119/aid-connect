@@ -294,6 +294,7 @@ export const getUserDonationHistory = async (req, res) => {
           c.description AS campaign_desc,
           d.donation_date AS date,
           d.amount AS amount,
+          'Money' AS type,
           'Money' AS item,
           d.status
        FROM MoneyDonations d
@@ -309,6 +310,7 @@ export const getUserDonationHistory = async (req, res) => {
           c.description AS campaign_desc,
           d.donation_date AS date,
           d.food_items AS item,
+          'Food' as type,
           NULL AS amount,
           d.status
        FROM FoodDonations d
@@ -324,6 +326,7 @@ export const getUserDonationHistory = async (req, res) => {
           c.description AS campaign_desc,
           d.donation_date AS date,
           'Cloth' AS item,
+          'Clothes' AS type,
           NULL AS amount,
           d.status
        FROM ClothingDonations d
@@ -339,6 +342,7 @@ export const getUserDonationHistory = async (req, res) => {
           c.description AS campaign_desc,
           d.donation_date AS date,
           'Medical Supplies' AS item,
+          'Medical Supplies' as type,
           NULL AS amount,
           d.status
        FROM MedicalDonations d

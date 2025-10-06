@@ -335,7 +335,7 @@ export default function DonorDashboard() {
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Donation Receipt - ${donation.reference}</title>
+        <title>Donation Receipt </title>
         <style>
           body { 
             font-family: Arial, sans-serif; 
@@ -423,9 +423,9 @@ export default function DonorDashboard() {
       </head>
       <body>
         <div class="header">
-          <div class="logo">HopeBridge</div>
+          <div class="logo">AidConnect</div>
           <h1 class="receipt-title">DONATION RECEIPT</h1>
-          <div class="reference">Reference ID: ${donation.reference}</div>
+          
           <div>Date: ${donation.date} | Time: 14:30 PM</div>
         </div>
 
@@ -434,11 +434,11 @@ export default function DonorDashboard() {
           <div class="info-grid">
             <div class="info-item">
               <span class="label">Name:</span><br>
-              <span class="value">${userData.name}</span>
+              <span class="value">${user.name}</span>
             </div>
             <div class="info-item">
               <span class="label">Email:</span><br>
-              <span class="value">${userData.email}</span>
+              <span class="value">${user.email}</span>
             </div>
           </div>
         </div>
@@ -449,7 +449,7 @@ export default function DonorDashboard() {
             <div class="info-grid">
               <div class="info-item">
                 <span class="label">Campaign:</span><br>
-                <span class="value">${donation.title}</span>
+                <span class="value">${donation.campaign_name}</span>
               </div>
               <div class="info-item">
                 <span class="label">Date:</span><br>
@@ -464,10 +464,10 @@ export default function DonorDashboard() {
                 <span class="value">${donation.status}</span>
               </div>
             </div>
-            <div class="amount">$${donation.amount}</div>
+            <div class="amount">$${donation?.amount}</div>
             <div class="info-item">
               <span class="label">Description:</span><br>
-              <span class="value">${donation.description}</span>
+              <span class="value">${donation.campaign_desc}</span>
             </div>
           </div>
         </div>
@@ -477,9 +477,9 @@ export default function DonorDashboard() {
         </div>
 
         <div class="footer">
-          <p>HopeBridge Foundation</p>
+          <p>AidConnect Foundation</p>
           <p>123 Charity Street, Compassion City</p>
-          <p>Email: contact@hopebridge.org | Phone: (555) 123-HELP</p>
+          <p>Email: contact@aidconnect.org | Phone: (555) 123-HELP</p>
           <p>This receipt is generated electronically and does not require a signature.</p>
         </div>
       </body>
@@ -620,7 +620,7 @@ export default function DonorDashboard() {
       </head>
       <body>
         <div class="header">
-          <div class="logo">HopeBridge</div>
+          <div class="logo">AidConnect</div>
           <h1 class="report-title">DONATION REPORT</h1>
           <div>Generated on: ${new Date().toLocaleDateString()}</div>
           <div>Donor: ${userData.name} (${userData.email})</div>
@@ -699,9 +699,9 @@ export default function DonorDashboard() {
         </div>
 
         <div class="footer">
-          <p>HopeBridge Foundation</p>
+          <p>AidConnect Foundation</p>
           <p>123 Charity Street, Compassion City</p>
-          <p>Email: contact@hopebridge.org | Phone: (555) 123-HELP</p>
+          <p>Email: contact@AidConnect.org | Phone: (555) 123-HELP</p>
           <p>This report is generated electronically for your records.</p>
         </div>
       </body>
