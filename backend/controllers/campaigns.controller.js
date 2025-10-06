@@ -337,3 +337,32 @@ export const getCampaignById = async (req, res) => {
       .json({ message: "Internal server error", error: err.message });
   }
 };
+
+// controllers/campaigns.controller.js
+export const deleteCampaign = async (req, res) => {
+  const { campaign_id } = req.params;
+
+  try {
+    // Optional: delete donations related to this campaign
+    await pool.query(`DELETE FROM MoneyDonations WHERE campaign_id = ?`, [campaign_id]);
+    await pool.query(`DELETE FROM FoodDonations WHERE campaign_id = ?`, [campaign_id]);
+    await pool.query(`DELETE FROM ClothingDonations WHERE campaign_id = ?`, [campaign_id]);
+    await pool.query(`DELETE FROM MedicalDonations WHERE campaign_id = ?`, [campaign_id]);
+
+    // Delete the campaign itself
+    const [result] = await pool.query(
+      `DELETE FROM Campaigns WHERE campaign_id = ?`,
+      [campaign_id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Campaign not found" });
+    }
+
+    res.status(200).json({ message: "Campaign deleted successfully" });
+  } catch (error) {
+    console.error("❌ Error deleting campaign:", error);
+    res.status(500).json({ error: "Failed to delete campaign" });
+  }
+};
+

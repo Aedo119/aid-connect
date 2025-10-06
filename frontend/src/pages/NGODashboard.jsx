@@ -166,14 +166,11 @@ export default function NGODashboard() {
   };
 
   const handleDeleteCampaign = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this campaign?"))
-      return;
+  
 
     try {
-      // Simulate API call
-      // await fetch(`/api/campaigns/${id}`, { method: "DELETE" });
-
-      setCampaigns((prev) => prev.filter((c) => c.id !== id));
+      await api.delete(`/campaign/delete/${id}`);
+      setCampaigns((prev) => prev.filter((c) => c.campaign_id !== id));
     } catch (error) {
       console.error("Failed to delete campaign", error);
       alert("Failed to delete campaign. Please try again.");
