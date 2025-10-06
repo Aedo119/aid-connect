@@ -21,7 +21,7 @@ import api from "../API/api";
 export default function CreateCampaign() {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
-  const {user}=useAuth();
+  const { user } = useAuth();
 
   const [formData, setFormData] = useState({
     imageFile: null,
@@ -182,8 +182,7 @@ export default function CreateCampaign() {
         progress: 0,
         createdDate: new Date().toISOString().split("T")[0],
         image:
-          imagePreview ||
-          "https://images.unsplash.com/photo-1759420740201-7e7af435ca80?q=80&w=644&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+          "https://images.unsplash.com/photo-1645165052641-c4081bc9eb48?q=80&w=2068&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       };
       const result = await api.post("/campaign/create", campaignData, {
         headers: {
@@ -486,7 +485,6 @@ export default function CreateCampaign() {
                         <input
                           type="file"
                           accept="image/*"
-                          onChange={handleImageChange}
                           className="hidden"
                         />
                       </label>
