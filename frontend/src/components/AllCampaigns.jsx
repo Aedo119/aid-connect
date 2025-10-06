@@ -128,7 +128,8 @@ export default function AllCampaigns() {
 
                 {/* Body */}
                 <Link
-                  to={`/donate/${c.id}`}
+                  to={`/donate/${c.campaign_id}`}
+                  state={{ campaign: c }}
                   className="flex-grow space-y-3 p-5 cursor-pointer"
                 >
                   <h3 className="text-lg font-semibold leading-snug hover:text-teal-600 transition-colors">

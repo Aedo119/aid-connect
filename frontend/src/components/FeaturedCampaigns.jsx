@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import ProgressBar from "./ProgressBar";
 import { DollarSign, Package, Shirt, Cross, Heart } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import api from "../API/api";
 
@@ -47,6 +47,7 @@ function DonationIcon({ type }) {
 
 export default function FeaturedCampaigns() {
   const [campaigns, setCampaigns] = useState([]);
+  const navigate = useNavigate();
   const [selectedDonationTypes, setSelectedDonationTypes] = useState({});
   const { user } = useAuth();
   useEffect(() => {
@@ -113,8 +114,12 @@ export default function FeaturedCampaigns() {
                 </div>
 
                 {/* Body */}
-                <Link
-                  to={`/donate/${c.campaign_id}`}
+                <div
+                  onClick={() => {
+                    navigate(`/donate/${c.campaign_id}`, {
+                      state: { campaign: c },
+                    });
+                  }}
                   className="flex-grow space-y-3 p-5 cursor-pointer"
                 >
                   <h3 className="text-lg font-semibold leading-snug hover:text-teal-600 transition-colors">
@@ -129,7 +134,7 @@ export default function FeaturedCampaigns() {
                       {c.organization_name}
                     </span>
                   </p>
-                </Link>
+                </div>
 
                 {/* Footer */}
                 <div className="p-5 pt-0 space-y-3 mt-auto">
